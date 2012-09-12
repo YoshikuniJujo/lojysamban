@@ -18,7 +18,7 @@ main = do
 		Just r -> fromMaybe "go'i" $ answerMa r
 		Nothing -> "nago'i"
 --	putStrLn $ if ask q facts then "go'i" else "nago'i"
-	putStrLn $ show $ ask q facts
+--	putStrLn $ show $ ask q facts
 --	print q
 
 answerMa :: [[(Term, Term)]] -> Maybe String
