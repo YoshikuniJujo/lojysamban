@@ -1,3 +1,4 @@
+import PrologLike
 import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA)
 import qualified Language.Lojban.Parser as P
 import System.Environment
@@ -10,9 +11,14 @@ main = do
 	src <- readFile fn
 	let Right p = parse src
 	let facts = map readSentence $ getSentences p
-	print facts
+--	print facts
 	q <- (readSentence . either (error "bad") id . parse) `fmap` getLine
-	putStrLn $ if ask q facts then "go'i" else "nago'i"
+	putStrLn $ case ask q facts of
+		Just _ -> "go'i"
+		Nothing -> "nago'i"
+--	putStrLn $ if ask q facts then "go'i" else "nago'i"
+--	putStrLn $ show $ ask q facts
+--	print q
 
 getSentences :: Sentence -> [Sentence]
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
@@ -42,6 +48,11 @@ function (P.NA (_, "na", _) _ s) = NA $ function s
 readLALO :: Sumti -> Term
 readLALO (P.LA (_, "la", _) _ _ ns _) = LA $ concat $ map ((++ ".") . snd3) ns
 readLALO (P.LALE (_, "lo", _) _ st _ _) = LO $ readSumtiTail st
+readLALO (P.KOhA (_, k@"ma", _) _) = VKOhA k
+readLALO (P.KOhA (_, k@"da", _) _) = VKOhA k
+readLALO (P.KOhA (_, k@"de", _) _) = VKOhA k
+readLALO (P.KOhA (_, k@"di", _) _) = VKOhA k
+readLALO (P.KOhA (_, k@"do", _) _) = VKOhA k
 readLALO (P.KOhA (_, k, _) _) = KOhA k
 
 readSumtiTail :: SumtiTail -> String
@@ -60,20 +71,10 @@ getRule (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) = readTUhE t
 
 readTUhE (TUhE _ _ _ t _ _) = map readSentence $ getSentences t
 
-data FactRule
-	= Fact Function [Term]
-	| Rule FactRule [FactRule]
-	deriving (Show, Eq)
-
-data Term
-	= LA String
-	| LO String
-	| KOhA String
-	deriving (Show, Eq)
-
 checkKOhA :: FactRule -> FactRule -> [(Term, Term)]
 checkKOhA (Fact _ ts1) (Fact _ ts2) = zip ts1 ts2
 
+{-
 findFacts :: FactRule -> [FactRule] -> [FactRule]
 findFacts (Fact f0 _) fs = filter (isFactFor f0) fs
 
@@ -118,12 +119,7 @@ changeTerm t1 t2 (t : ts)
 
 sampleRule = Rule (Fact (Brivla "pendo") [KOhA "da", KOhA "de"])
 	[Fact (Brivla "nelci") [KOhA "da", KOhA "de"]]
-
-data Function
-	= Brivla String
-	| GOhA String
-	| NA Function
-	deriving (Show, Eq)
+-}
 
 snd3 :: (a, b, c) -> b
 snd3 (_, y, _) = y
