@@ -87,6 +87,8 @@ matchTerms (t1 : t1s) (t2 : t2s) = case matchTerm t1 t2 of
 matchTerm :: Term -> Term -> Maybe (Maybe (Term, Term))
 matchTerm t1@(VKOhA _) t2 = Just $ Just (t1, t2)
 matchTerm t1 t2@(VKOhA _) = Just $ Just (t1, t2)
+matchTerm t1@(LerfuString _) t2 = Just $ Just (t1, t2)
+matchTerm t1 t2@(LerfuString _) = Just $ Just (t1, t2)
 matchTerm t1 t2
 	| t1 == t2 = Just Nothing
 	| otherwise = Nothing
@@ -107,6 +109,7 @@ data Term
 	| LO String
 	| KOhA String
 	| VKOhA String
+	| LerfuString String
 	deriving (Show, Eq)
 
 sampleQ = Fact (Brivla "nelci") [VKOhA "da", VKOhA "de"]

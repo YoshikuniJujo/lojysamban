@@ -1,5 +1,5 @@
 import PrologLike
-import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA)
+import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString)
 import qualified Language.Lojban.Parser as P
 import System.Environment
 import Data.Maybe
@@ -15,16 +15,41 @@ main = do
 --	print facts
 	q <- (readSentence . either (error "bad") id . parse) `fmap` getLine
 	putStrLn $ case ask q facts of
-		Just r -> fromMaybe "go'i" $ answerMa r
+		Just r -> case answerMa r of
+			Just ma -> ma
+			Nothing -> case answerRelfuString r of
+				Just rs -> rs
+				Nothing -> "go'i"
 		Nothing -> "nago'i"
+--	maybe (return ()) putStrLn $ answerRelfuString $ ask q facts
 --	putStrLn $ if ask q facts then "go'i" else "nago'i"
 --	putStrLn $ show $ ask q facts
 --	print q
 
+answerRelfuString :: [[(Term, Term)]] -> Maybe String
+answerRelfuString ps
+	| null answers = Nothing
+	| otherwise = Just $ intercalate " .ija " answers
+	where
+	answers = map answerRelfuString1 ps
+
+answerRelfuString1 :: [(Term, Term)] -> String
+answerRelfuString1 ps = "tu'e " ++ intercalate " .ije " (map showDU rsps) ++ " tu'u"
+	where
+	rsps = filter isRSPair ps
+
+showDU :: (Term, Term) -> String
+showDU (LerfuString ls, LA n) = ls ++ " du la " ++ n
+showDU (LerfuString ls, LO n) = ls ++ " du lo " ++ n
+
+isRSPair :: (Term, Term) -> Bool
+isRSPair (LerfuString _, _) = True
+isRSPair _ = False
+
 answerMa :: [[(Term, Term)]] -> Maybe String
 answerMa ps
 	| null answers = Nothing
-	| otherwise = Just $ intercalate " .e " $ catMaybes $ map answerMa1 ps
+	| otherwise = Just $ intercalate " .a " answers
 	where
 	answers = catMaybes $ map answerMa1 ps
 
@@ -37,6 +62,7 @@ answerMa1 ps = case lookup (VKOhA "ma") ps of
 getSentences :: Sentence -> [Sentence]
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
 getSentences (StatementI s1 ss) = s1 : catMaybes (map (\(_, _, s) -> s) ss)
+getSentences o = error $ show o
 
 headTerms :: Sentence -> [Sumti]
 headTerms (TermsBridiTail ts _ _ _) = ts
@@ -68,6 +94,7 @@ readLALO (P.KOhA (_, k@"de", _) _) = VKOhA k
 readLALO (P.KOhA (_, k@"di", _) _) = VKOhA k
 readLALO (P.KOhA (_, k@"do", _) _) = VKOhA k
 readLALO (P.KOhA (_, k, _) _) = KOhA k
+readLALO (P.LerfuString s _ _) = LerfuString $ concatMap snd3 s
 
 readSumtiTail :: SumtiTail -> String
 readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n

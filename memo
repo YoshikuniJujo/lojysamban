@@ -1,3 +1,9 @@
 2012.09.12 Wed.
 
+xy., .ybu, alabam.bu 等が使えるようにする。
+da, de, di, do と同様の扱いとする。
+これらを結果にどう表示しようか。
+da du la hoger..i de du la hager.
+といった感じか。
 
+その前に package 化してしまおうかな。
