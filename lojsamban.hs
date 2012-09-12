@@ -4,6 +4,7 @@ import qualified Language.Lojban.Parser as P
 import System.Environment
 import Data.Maybe
 import Data.Either
+import Data.List
 
 main :: IO ()
 main = do
@@ -14,11 +15,24 @@ main = do
 --	print facts
 	q <- (readSentence . either (error "bad") id . parse) `fmap` getLine
 	putStrLn $ case ask q facts of
-		Just _ -> "go'i"
+		Just r -> fromMaybe "go'i" $ answerMa r
 		Nothing -> "nago'i"
 --	putStrLn $ if ask q facts then "go'i" else "nago'i"
---	putStrLn $ show $ ask q facts
+	putStrLn $ show $ ask q facts
 --	print q
+
+answerMa :: [[(Term, Term)]] -> Maybe String
+answerMa ps
+	| null answers = Nothing
+	| otherwise = Just $ intercalate " .e " $ catMaybes $ map answerMa1 ps
+	where
+	answers = catMaybes $ map answerMa1 ps
+
+answerMa1 :: [(Term, Term)] -> Maybe String
+answerMa1 ps = case lookup (VKOhA "ma") ps of
+	Nothing -> Nothing
+	Just (LA n) -> Just $ "la " ++ n
+	Just (LO n) -> Just $ "lo " ++ n
 
 getSentences :: Sentence -> [Sentence]
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
