@@ -1,9 +1,12 @@
-module Unification where
+module Unification (unification) where
 
 import Control.Applicative
 import Data.List
 
 data Term = Con String | Var String deriving (Eq, Show)
+
+unification :: [Term] -> [Term] -> Maybe [([Term], Maybe Term)]
+unification ts us = simplify =<< unifies ts us
 
 unify :: Term -> Term -> Maybe (Maybe (Term, Term))
 unify t u | t == u = Just Nothing
