@@ -1,4 +1,4 @@
-module Unif (unification, merge) where
+module Unif (unification, merge') where
 
 import Control.Applicative
 import Data.List hiding (deleteBy)
