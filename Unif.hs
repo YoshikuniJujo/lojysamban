@@ -15,13 +15,19 @@ type Result sc s = [([Term sc s], Maybe (Term sc s))]
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
 merge [] uss = Just uss
 merge (tsv@(ts, v1) : tss) uss = case us of
-	Nothing -> merge tss $ tsv : uss
-	Just (us, v2) -> case mergeValue v1 v2 of
+	[] -> merge tss $ tsv : uss
+	(us, v2) : rest -> case mergeValue v1 v2 of
 		Nothing -> Nothing
-		Just v -> merge tss $ (union ts us, v) : uss'
+		Just v	| not $ allEqual $ v2 : map snd rest -> Nothing
+			| otherwise -> merge tss $
+				(foldr union (union ts us) $ map fst rest, v) : uss'
 	where
-	us = lookupElems ts uss
-	uss' = deleteElems ts uss
+	us = filterElems ts uss
+	uss' = deleteElems' ts uss
+
+allEqual :: Eq a => [a] -> Bool
+allEqual [x] = True
+allEqual (x : y : xs) = x == y && allEqual (y : xs)
 
 mergeValue :: Eq a => Maybe a -> Maybe a -> Maybe (Maybe a)
 mergeValue x@(Just _) y@(Just _)
@@ -102,6 +108,9 @@ simplify ((t, u) : ps) = case simplify ps of
 deleteElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
 deleteElems = deleteBy $ \x y -> not $ null $ intersect x y
 
+deleteElems' :: Eq a => [a] -> [([a], b)] -> [([a], b)]
+deleteElems' xs = filter $ \ys -> null $ intersect xs $ fst ys
+
 deleteBy :: (a -> b -> Bool) -> a -> [(b, c)] -> [(b, c)]
 deleteBy _ _ [] = []
 deleteBy p x ((y, z) : ps)
@@ -113,6 +122,9 @@ deleteElem _ [] = []
 deleteElem x ((xs, y) : ps)
 	| x `elem` xs = ps
 	| otherwise = (xs, y) : deleteElem x ps
+
+filterElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
+filterElems xs = filter (\ys -> not $ null $ intersect xs $ fst ys)
 
 lookupElems :: Eq a => [a] -> [([a], b)] -> Maybe ([a], b)
 lookupElems = lookupBy $ \x y -> not $ null $ intersect x y
