@@ -1,4 +1,9 @@
-module Unif (unification, merge') where
+module Unif (
+	unification,
+	merge,
+	Term(..),
+	Result
+) where
 
 import Control.Applicative
 import Data.List hiding (deleteBy)
@@ -7,25 +12,13 @@ data Term sc s = Con s | Var sc s deriving (Eq, Show)
 
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
-merge, merge' :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
+merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
 merge [] uss = Just uss
-merge (tsv@(ts, v1) : tss) uss = case merge tss uss' of
-	Nothing -> Nothing
-	Just ps -> case us of
-		Nothing -> Just $ tsv : ps
-		Just (us, v2) -> case mergeValue v1 v2 of
-			Nothing -> Nothing
-			Just v -> Just $ (union ts us, v) : ps
-	where
-	us = lookupElems ts uss
-	uss' = deleteElems ts uss
-
-merge' [] uss = Just uss
-merge' (tsv@(ts, v1) : tss) uss = case us of
-	Nothing -> merge' tss $ tsv : uss
+merge (tsv@(ts, v1) : tss) uss = case us of
+	Nothing -> merge tss $ tsv : uss
 	Just (us, v2) -> case mergeValue v1 v2 of
 		Nothing -> Nothing
-		Just v -> merge' tss $ (union ts us, v) : uss'
+		Just v -> merge tss $ (union ts us, v) : uss'
 	where
 	us = lookupElems ts uss
 	uss' = deleteElems ts uss
