@@ -1,4 +1,10 @@
-module Prolog where
+module Prolog (
+	ask,
+	Fact,
+	Unify(..),
+	Rule(..),
+	Term(..)
+) where
 
 import Unif
 import Data.Maybe
@@ -10,6 +16,7 @@ data Unify sc s
 	| NotUnify (Term sc s) (Term sc s)
 	deriving Show
 data Rule sc s = Rule (Fact sc s) [Unify sc s] [Fact sc s]
+	deriving Show
 
 fact1, fact2 :: Fact String String
 fact1 = [Con "likes", Con "wallace", Con "cheese"]
