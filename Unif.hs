@@ -1,11 +1,43 @@
-module Unif (unification) where
+module Unif (unification, merge) where
 
 import Control.Applicative
-import Data.List
+import Data.List hiding (deleteBy)
 
 data Term sc s = Con s | Var sc s deriving (Eq, Show)
 
--- unification :: [Term] -> [Term] -> Maybe [([Term], Maybe Term)]
+type Result sc s = [([Term sc s], Maybe (Term sc s))]
+
+merge, merge' :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
+merge [] uss = Just uss
+merge (tsv@(ts, v1) : tss) uss = case merge tss uss' of
+	Nothing -> Nothing
+	Just ps -> case us of
+		Nothing -> Just $ tsv : ps
+		Just (us, v2) -> case mergeValue v1 v2 of
+			Nothing -> Nothing
+			Just v -> Just $ (union ts us, v) : ps
+	where
+	us = lookupElems ts uss
+	uss' = deleteElems ts uss
+
+merge' [] uss = Just uss
+merge' (tsv@(ts, v1) : tss) uss = case us of
+	Nothing -> merge' tss $ tsv : uss
+	Just (us, v2) -> case mergeValue v1 v2 of
+		Nothing -> Nothing
+		Just v -> merge' tss $ (union ts us, v) : uss'
+	where
+	us = lookupElems ts uss
+	uss' = deleteElems ts uss
+
+mergeValue :: Eq a => Maybe a -> Maybe a -> Maybe (Maybe a)
+mergeValue x@(Just _) y@(Just _)
+	| x == y = Just x
+	| otherwise = Nothing
+mergeValue x@(Just _) _ = Just x
+mergeValue _ y = Just y
+
+unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification ts us = simplify =<< unifies ts us
 
 -- unify :: Term -> Term -> Maybe (Maybe (Term, Term))
@@ -74,11 +106,29 @@ simplify ((t, u) : ps) = case simplify ps of
 		Just (us, _) -> Just $ (us, Just t) : deleteElem u ps'
 		_ -> Just $ ([u], Just t) : ps'
 
+deleteElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
+deleteElems = deleteBy $ \x y -> not $ null $ intersect x y
+
+deleteBy :: (a -> b -> Bool) -> a -> [(b, c)] -> [(b, c)]
+deleteBy _ _ [] = []
+deleteBy p x ((y, z) : ps)
+	| p x y = ps
+	| otherwise = (y, z) : deleteBy p x ps
+
 deleteElem :: Eq a => a -> [([a], b)] -> [([a], b)]
 deleteElem _ [] = []
 deleteElem x ((xs, y) : ps)
 	| x `elem` xs = ps
 	| otherwise = (xs, y) : deleteElem x ps
+
+lookupElems :: Eq a => [a] -> [([a], b)] -> Maybe ([a], b)
+lookupElems = lookupBy $ \x y -> not $ null $ intersect x y
+
+lookupBy :: (a -> b -> Bool) -> a -> [(b, c)] -> Maybe (b, c)
+lookupBy _ _ [] = Nothing
+lookupBy p x ((y, z) :ps)
+	| p x y = Just (y, z)
+	| otherwise = lookupBy p x ps
 
 lookupElem :: Eq a => a -> [([a], b)] -> Maybe ([a], b)
 lookupElem _ [] = Nothing
