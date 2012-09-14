@@ -90,3 +90,28 @@ unification できると確定した状態。
 not の check はできそう。
 そしたら、次にすることは、すべての rule と unification した結果のすべてにおいて、
 check が通ることを確かめることだ。
+
+たとえば、(du, D, D) とした場合、
+not (du, X, Y) について考えるとして。
+その場合、X と Y が等しかったとしても、
+それらと等しくない D が考えられるということで not (du, X, Y) が成り立ってしまう。
+(X, Y, Z) (A, B, C) においてはどれかのペアが違えば良いということだが。
+とりあえず、check される側に存在しない変数については消してしまうというように
+してみようか。
+
+今のところすべての変数がグローバルとなってしまっているため、たとえば、
+以下のような例でうまく動かない。
+
+.i do du do
+.i da broda de .ijanai tu'e
+	da du lo cinfo .i
+	de du lo tirxu
+tu'u
+
+つまり、同じ do に lo cinfo と lo tirxu を unification しようとして、
+失敗する。
+scope についてきちんと対処する必要がある。
+また、色分け問題においては、core dump した。
+
+scope は呼び出しごとに [Int] を変化させることで解決できると思う。
+Rule は [Int] -> Rule とする。
