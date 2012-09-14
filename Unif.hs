@@ -2,6 +2,8 @@ module Unif (
 	unification,
 	merge,
 	Term(..),
+	checkSimple2,
+	simplify2All,
 	Result
 ) where
 
@@ -13,7 +15,7 @@ data Term sc s = Con s | Var sc s deriving (Eq, Show)
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
-merge [] uss = Just uss
+merge [] uss = Just $ simplify2All uss
 merge (tsv@(ts, v1) : tss) uss = case us of
 	[] -> merge tss $ tsv : uss
 	(us, v2) : rest -> case mergeValue v1 v2 of
@@ -37,7 +39,8 @@ mergeValue x@(Just _) _ = Just x
 mergeValue _ y = Just y
 
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
-unification ts us = simplify2 <$> (simplify =<< unifies ts us)
+unification ts us = simplify2All <$> (simplify =<< unifies ts us)
+-- unification ts us = (simplify =<< unifies ts us)
 
 -- unify :: Term -> Term -> Maybe (Maybe (Term, Term))
 unify t u | t == u = Just Nothing
@@ -69,6 +72,20 @@ hoge = Con "hoge"
 -- before :: [(Term, Term)]
 before = [(x, a), (a, y), (b, z), (hoge, b)]
 
+simplify2All :: (Eq sc, Eq s) => Result sc s -> Result sc s
+simplify2All ps
+	| checkSimple2 ps = ps
+	| otherwise = simplify2All $ simplify2 ps
+
+checkSimple2 :: (Eq sc, Eq s) => Result sc s -> Bool
+checkSimple2 = notDup . map snd
+
+notDup :: Eq a => [a] -> Bool
+notDup [] = True
+notDup (x : xs)
+	| x `elem` xs = False
+	| otherwise = notDup xs
+
 simplify2 [] = []
 simplify2 ((ts, v@(Just _)) : ps) = (maybe ts (ts ++) ts', v) : simplify2 ps'
 	where
@@ -80,7 +97,7 @@ lookupSnd :: Eq b => b -> [(a, b)] -> Maybe a
 lookupSnd x = lookup x . map (\(y, z) -> (z, y))
 
 deleteSnd :: Eq b => b -> [(a, b)] -> [(a, b)]
-deleteSnd x = filter ((== x) . snd)
+deleteSnd x = filter ((/= x) . snd)
 
 -- simplify :: [(Term, Term)] -> Maybe [([Term], Maybe Term)]
 simplify [] = Just []
