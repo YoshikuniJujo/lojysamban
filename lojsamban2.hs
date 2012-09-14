@@ -2,7 +2,7 @@ module Main where
 
 import LojbanTools
 import Prolog
-import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA)
+import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString)
 import qualified Language.Lojban.Parser as P
 import System.Environment
 import Data.Maybe
@@ -20,7 +20,7 @@ main = do
 	let	answer = ask q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
---	print answer
+	print answer
 	putStrLn $ showAnswerAll answer
 
 showAnswerAll a = if null a then "nago'i" else
@@ -46,7 +46,7 @@ data Atom
 	| KOhA String
 	| Brivla String
 	| GOhA String
-	| NA Atom
+	| LerfuString String
 	deriving (Show, Eq)
 
 type Scope = String
@@ -55,6 +55,7 @@ readSumti :: Scope -> Sumti -> Term Scope Atom
 readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ concat $ map snd3 ns
 readSumti sc (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti sc (P.KOhA (_, k, _) _) = Var sc $ KOhA k
+readSumti sc (P.LerfuString s _ _) = Var sc $ LerfuString $ concatMap snd3 s
 
 readSumtiTail :: SumtiTail -> String
 readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n
