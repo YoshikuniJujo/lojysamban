@@ -37,7 +37,7 @@ mergeValue x@(Just _) _ = Just x
 mergeValue _ y = Just y
 
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
-unification ts us = simplify =<< unifies ts us
+unification ts us = simplify2 <$> (simplify =<< unifies ts us)
 
 -- unify :: Term -> Term -> Maybe (Maybe (Term, Term))
 unify t u | t == u = Just Nothing
@@ -68,6 +68,19 @@ z = Var "" "Z"
 hoge = Con "hoge"
 -- before :: [(Term, Term)]
 before = [(x, a), (a, y), (b, z), (hoge, b)]
+
+simplify2 [] = []
+simplify2 ((ts, v@(Just _)) : ps) = (maybe ts (ts ++) ts', v) : simplify2 ps'
+	where
+	ts' = lookupSnd v ps
+	ps' = deleteSnd v ps
+simplify2 (p : ps) = p : simplify2 ps
+
+lookupSnd :: Eq b => b -> [(a, b)] -> Maybe a
+lookupSnd x = lookup x . map (\(y, z) -> (z, y))
+
+deleteSnd :: Eq b => b -> [(a, b)] -> [(a, b)]
+deleteSnd x = filter ((== x) . snd)
 
 -- simplify :: [(Term, Term)] -> Maybe [([Term], Maybe Term)]
 simplify [] = Just []
