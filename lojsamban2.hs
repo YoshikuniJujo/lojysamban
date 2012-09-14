@@ -20,6 +20,7 @@ main = do
 	let	answer = ask q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
+--	print answer
 	putStrLn $ showAnswerAll answer
 
 showAnswerAll a = if null a then "nago'i" else
@@ -30,6 +31,7 @@ lookupMA = map snd . filter ((Var "top" (KOhA "ma") `elem`) . fst)
 showAnswer as = if null as then "go'i" else showLA $ head as
 
 showLA (Just (Con (LA n))) = "la " ++ n
+showLA (Just (Con (LO n))) = "lo " ++ n
 
 onlyTop = filter (not . null . fst) .
 	map (\(vars, val) -> (filter isTop vars, val))
