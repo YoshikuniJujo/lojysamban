@@ -1,4 +1,4 @@
-module Unification (unification) where
+module Unification (Term(..), unification, a, b, x, y, z, hoge) where
 
 import Control.Applicative
 import Data.List
