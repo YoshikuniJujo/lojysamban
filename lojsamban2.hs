@@ -1,3 +1,6 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Main where
 
 import LojbanTools
@@ -14,14 +17,14 @@ main = do
 	[fn] <- getArgs
 	src <- readFile fn
 	let	Right p = parse src
-		rules = map (readSentence "rules") $ getSentences p
-	Left q <- (readSentenceFact "top" . either (error "bad") id . parse)
+		rules = map readSentence $ getSentences p
+	Left q <- (readSentenceFact . either (error "bad") id . parse)
 		`fmap` getLine
-	let	answer = ask q rules
+	let	answer = ask [] q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
 	print answer
-	putStrLn $ showAnswerAll answer
+--	putStrLn $ showAnswerAll answer
 
 showAnswerAll a = if null a then "nago'i" else
 	intercalate " .a " $ map showAnswer $ map (lookupMA . onlyTop) a
@@ -49,7 +52,11 @@ data Atom
 	| LerfuString String
 	deriving (Show, Eq)
 
-type Scope = String
+type Scope = [Int]
+
+instance TwoD [Int] where
+	next (n : ns) = n + 1 : ns
+	down ns = 0 : ns
 
 readSumti :: Scope -> Sumti -> Term Scope Atom
 readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ concat $ map snd3 ns
@@ -68,27 +75,28 @@ readSelbri (P.Brivla (_, n, _) _) = Left $ Con $ Brivla n
 readSelbri (P.GOhA (_, n, _) _ _) = Left $ Con $ GOhA n
 readSelbri (P.NA (_, "na", _) _ s) = Right $ Con $ readSelbriAtom s
 
-readSentenceFact :: Scope -> Sentence -> Either (Fact Scope Atom) (Fact Scope Atom)
-readSentenceFact sc s@(TermsBridiTail _ _ _ _) =
-	either (Left . (: (h ++ t))) (Right . (: (h ++ t))) f
+readSentenceFact :: Sentence -> Either (Fact Scope Atom) (Fact Scope Atom)
+readSentenceFact s@(TermsBridiTail _ _ _ _) =
+	either (\lf -> Left $ \sc -> lf : (h sc ++ t sc))
+		(\rf -> Right $ \sc -> rf : (h sc ++ t sc)) f
 	where
-	h = map (readSumti sc) $ headTerms s
+	h sc = map (readSumti sc) $ headTerms s
 	f = readSelbri $ selbri $ bridiTail s
-	t = map (readSumti sc) $ tailTerms $ bridiTail s
+	t sc = map (readSumti sc) $ tailTerms $ bridiTail s
 
-readSentence :: Scope -> Sentence -> Rule Scope Atom
-readSentence sc s@(TermsBridiTail _ _ _ _) = Rule (f : h ++ t) [] [] []
+readSentence :: Sentence -> Rule Scope Atom
+readSentence s@(TermsBridiTail _ _ _ _) = Rule (\sc -> f : h sc ++ t sc) [] [] []
 	where
-	h = map (readSumti sc) $ headTerms s
+	h sc = map (readSumti sc) $ headTerms s
 	Left f = readSelbri $ selbri $ bridiTail s
-	t = map (readSumti sc) $ tailTerms $ bridiTail s
-readSentence sc (IJoikJek s [r]) = Rule f [] (getRule sc r) (getNotRule sc r)
+	t sc = map (readSumti sc) $ tailTerms $ bridiTail s
+readSentence (IJoikJek s [r]) = Rule f [] (getRule r) (getNotRule r)
 	where
-	Left f = readSentenceFact sc s
+	Left f = readSentenceFact s
 
-getRule sc (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
-	lefts $ readTUhE sc t
-getNotRule sc (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
-	rights $ readTUhE sc t
+getRule (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
+	lefts $ readTUhE t
+getNotRule (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
+	rights $ readTUhE t
 
-readTUhE sc (TUhE _ _ _ t _ _) = map (readSentenceFact sc) $ getSentences t
+readTUhE (TUhE _ _ _ t _ _) = map readSentenceFact $ getSentences t
