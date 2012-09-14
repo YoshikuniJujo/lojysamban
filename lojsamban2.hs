@@ -33,8 +33,12 @@ type Scope = String
 
 readSumti :: Sumti -> Term Scope Atom
 readSumti (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ concat $ map snd3 ns
-readSumti (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ show st
+readSumti (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti (P.KOhA (_, k, _) _) = Var "" $ KOhA k
+
+readSumtiTail :: SumtiTail -> String
+readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n
+readSumtiTail st = show st
 
 readSelbriAtom (P.GOhA (_, n, _) _ _) = GOhA n
 
