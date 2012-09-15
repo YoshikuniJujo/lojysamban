@@ -11,6 +11,7 @@ import System.Environment
 import Data.Maybe
 import Data.Either
 import Data.List
+import Control.Monad
 
 main :: IO ()
 main = do
@@ -23,7 +24,7 @@ main = do
 	let	answer = ask [] q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
-	print answer
+	forM_ answer print
 --	putStrLn $ showAnswerAll answer
 
 showAnswerAll a = if null a then "nago'i" else
