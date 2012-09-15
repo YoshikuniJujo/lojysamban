@@ -49,11 +49,20 @@ rule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
 rule4 = Rule (\sc -> [Con "du", Var sc "D", Var sc "D"]) [] [] []
 rules = [rule1, rule2, rule2_5, rule3, rule4]
 
+simpleRule = [rule1, rule2, srule3]
+srule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
+	[] [\sc -> [Con "likes", Var sc "X", Var sc "Y"]] []
+
+bug1 = ask "" (\sc -> [Con "friends", Var sc "Who", Var sc "What"]) simpleRule
+
 q1, q2 :: Fact String String
 q1 sc = [Con "likes", Var sc "X", Con "cheese"]
 q2 sc = [Con "friends", Con "wallace", Con "grommit"]
 q3 sc = [Con "friends", Con "wallace", Con "wallace"]
 q4 sc = [Con "friends", Var sc "Who", Con "grommit"]
+q5 sc = [Con "frineds", Var sc "X", Var sc "Y"]
+q6 sc = [Con "frineds", Var sc "V", Var sc "W"]
+q7 sc = [Con "likes", Var sc "Who", Var sc "What"]
 
 rules2 = [rule21, rule22]
 rule21 = rule4
@@ -85,7 +94,8 @@ maybeOut (Just x : xs) = maybe Nothing (Just . (x :)) $ maybeOut xs
 
 ask :: (TwoD sc, Eq sc, Eq s) =>
 	sc -> Fact sc s -> [Rule sc s] -> [Result sc s]
-ask sc q rs = concat $ zipWith (\sc r -> askRule sc q r rs) (iterate next $ down sc) rs
+ask sc q rs =
+	  concat $ zipWith (\sc r -> askRule sc q r rs) (iterate next $ down sc) rs
 
 askRule :: (TwoD sc, Eq sc, Eq s) =>
 	sc -> Fact sc s -> Rule sc s -> [Rule sc s] -> [Result sc s]
