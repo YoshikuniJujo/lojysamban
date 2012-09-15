@@ -19,10 +19,6 @@ class TwoD td where
 	next :: td -> td
 	down :: td -> td
 
-instance TwoD String where
-	next = (++ " next")
-	down = (++ " down")
-
 type Fact sc s = sc -> [Term sc s]
 type NotFact sc s = Fact sc s
 data Unify sc s
@@ -31,45 +27,6 @@ data Unify sc s
 	deriving Show
 data Rule sc s = Rule (Fact sc s) [Unify sc s] [Fact sc s] [NotFact sc s]
 --	deriving Show
-
-fact1, fact2 :: Fact String String
-fact1 = const [Con "likes", Con "wallace", Con "cheese"]
-fact2 = const [Con "likes", Con "grommit", Con "cheese"]
-fact3 = const [Con "likes", Con "wendolene", Con "sheep"]
-fact4 sc = [Con "likes", Var sc "X", Var sc "Z"]
-fact5 sc = [Con "likes", Var sc "Y", Var sc "Z"]
-
-rule1 :: Rule String String
-rule1 = Rule fact1 [] [] []
-rule2 = Rule fact2 [] [] []
-rule2_5 = Rule fact3 [] [] []
-rule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
---	[NotUnify (Var "" "X") (Var "" "Y")] [fact4, fact5] []
-	[] [fact4, fact5] [\sc -> [Con "du", Var sc "X", Var sc "Y"]]
-rule4 = Rule (\sc -> [Con "du", Var sc "D", Var sc "D"]) [] [] []
-rules = [rule1, rule2, rule2_5, rule3, rule4]
-
-simpleRule = [rule1, rule2, srule3]
-srule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
-	[] [\sc -> [Con "likes", Var sc "X", Var sc "Y"]] []
-
-bug1 = ask "" (\sc -> [Con "friends", Var sc "Who", Var sc "What"]) simpleRule
-
-q1, q2 :: Fact String String
-q1 sc = [Con "likes", Var sc "X", Con "cheese"]
-q2 sc = [Con "friends", Con "wallace", Con "grommit"]
-q3 sc = [Con "friends", Con "wallace", Con "wallace"]
-q4 sc = [Con "friends", Var sc "Who", Con "grommit"]
-q5 sc = [Con "frineds", Var sc "X", Var sc "Y"]
-q6 sc = [Con "frineds", Var sc "V", Var sc "W"]
-q7 sc = [Con "likes", Var sc "Who", Var sc "What"]
-
-rules2 = [rule21, rule22]
-rule21 = rule4
-rule22 = Rule (\sc -> [Con "brode", Var sc "da", Var sc "de"])
-	[] [\sc -> [Con "du", Var sc "da", Con "cinfo"]
---		] []
-		, \sc -> [Con "du", Var sc "de", Con "tirxu"]] []
 
 notAsk :: (TwoD sc, Eq sc, Eq s) => sc ->
 	Fact sc s -> [Rule sc s] -> [Maybe [(Term sc s, Term sc s)]]
