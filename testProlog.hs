@@ -47,3 +47,18 @@ rule22 = Rule (\sc -> [Con "brode", Var sc "da", Var sc "de"])
 	[] [\sc -> [Con "du", Var sc "da", Con "cinfo"]
 --		] []
 		, \sc -> [Con "du", Var sc "de", Con "tirxu"]] []
+
+patfuFact1 :: Fact String String
+patfuFact1 sc = [Con "patfu", Con "zeb", Con "jon.bois.sr"]
+patfuFact2 sc = [Con "patfu", Con "jon.bois.sr", Con "jon.bois.jr"]
+
+patfuRule1 :: Rule String String
+patfuRule1 = Rule patfuFact1 [] [] []
+patfuRule2 = Rule patfuFact2 [] [] []
+patfuRule3 = Rule (\sc -> [Con "dzena", Var sc "da", Var sc "de"])
+	[] [\sc -> [Con "patfu", Var sc "da", Var sc "de"]] []
+patfuRule4 = Rule (\sc -> [Con "dzena", Var sc "da", Var sc "de"])
+	[] [	\sc -> [Con "patfu", Var sc "da", Var sc "di"],
+		\sc -> [Con "dzena", Var sc "di", Var sc "de"]] []
+
+patfuRules = [patfuRule1, patfuRule2, patfuRule3, patfuRule4]
