@@ -71,6 +71,7 @@ answerMa1 ps = case lookup (VKOhA "ma") ps of
 getSentences :: Sentence -> [Sentence]
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
 getSentences (StatementI s1 ss) = s1 : catMaybes (map (\(_, _, s) -> s) ss)
+getSentences tbt@(TermsBridiTail _ _ _ _) = [tbt]
 getSentences o = error $ show o
 
 headTerms :: Sentence -> [Sumti]
