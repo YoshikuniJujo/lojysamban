@@ -9,6 +9,7 @@ module Unif (
 
 import Control.Applicative
 import Data.List hiding (deleteBy)
+import Data.Maybe
 
 data Term sc s = Con s | Var sc s deriving (Eq, Show)
 
@@ -78,7 +79,14 @@ simplify2All ps
 	| otherwise = simplify2All $ simplify2 ps
 
 checkSimple2 :: (Eq sc, Eq s) => Result sc s -> Bool
-checkSimple2 = notDup . map snd
+checkSimple2 = notDup' . map snd
+
+notDup' :: Eq a => [Maybe a] -> Bool
+notDup' [] = True
+notDup' (Nothing : xs) = notDup' xs
+notDup' (Just x : xs)
+	| x `elem` (catMaybes xs) = False
+	| otherwise = notDup' xs
 
 notDup :: Eq a => [a] -> Bool
 notDup [] = True
