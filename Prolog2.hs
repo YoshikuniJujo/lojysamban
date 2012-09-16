@@ -21,7 +21,7 @@ askrule :: (TwoD sc, Eq sc, Eq s) =>
 askrule sc ret q r@(Rule fact _ facts notFacts) rs =
 	filter (flip checkAll nots) ret'
 	where
-	ret' = foldl (\rets f -> rets >>= \r -> ask sc r f rs) r0 $
+	ret' = foldl (\rets (sc', f) -> rets >>= \r -> ask sc' r f rs) r0 $ zip (iterate next sc) $
 		map (const . ($ sc)) facts
 	r0 = case (q sc) `unification` (fact sc) of
 		Nothing -> []

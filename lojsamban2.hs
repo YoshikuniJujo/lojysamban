@@ -4,7 +4,7 @@
 module Main where
 
 import LojbanTools
-import Prolog
+import Prolog2
 import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString)
 import qualified Language.Lojban.Parser as P
 import System.Environment
@@ -21,7 +21,7 @@ main = do
 		rules = map readSentence $ getSentences p
 	Left q <- (readSentenceFact . either (error "bad") id . parse)
 		`fmap` getLine
-	let	answer = ask [] q rules
+	let	answer = ask [] [] q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
 	forM_ answer print
