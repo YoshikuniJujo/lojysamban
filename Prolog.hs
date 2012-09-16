@@ -10,23 +10,16 @@ module Prolog (
 	TwoD(..)
 ) where
 
+import PrologTools
 import Unif
 import NotUnif
 import Data.Maybe
 import Control.Applicative
 
-class TwoD td where
-	next :: td -> td
-	down :: td -> td
-
-type Fact sc s = sc -> [Term sc s]
-type NotFact sc s = Fact sc s
 data Unify sc s
 	= Unify (Term sc s) (Term sc s)
 	| NotUnify (Term sc s) (Term sc s)
 	deriving Show
-data Rule sc s = Rule (Fact sc s) [Unify sc s] [Fact sc s] [NotFact sc s]
---	deriving Show
 
 notAsk :: (TwoD sc, Eq sc, Eq s) => sc ->
 	Fact sc s -> [Rule sc s] -> [Maybe [(Term sc s, Term sc s)]]
@@ -58,13 +51,9 @@ askRule :: (TwoD sc, Eq sc, Eq s) =>
 	sc -> Fact sc s -> Rule sc s -> [Rule sc s] -> [Result sc s]
 askRule sc q r@(Rule fact unify facts notFacts) rs =
 	filter (flip checkAll nots) ret
---	ret
 	where
 	ret = foldl mergeM (maybeToList start) $
---		map ((flip (ask sc) rs) . const . ($ sc)) facts
 		zipWith (\sc f -> ask sc f rs) (iterate next sc) $ map (const . ($ sc)) facts
---	start = foldl mergeM (unification q fact) $ map checkUnify unify
---	start = foldl cu (unification q fact) unify
 	start = unification (q sc) (fact sc)
 	nots = concat $ map ((flip (notAsk sc) rs) . const . ($sc)) notFacts
 	cu rr u = do
