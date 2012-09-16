@@ -4,7 +4,8 @@ module Prolog2 (
 --	Unify(..),
 	Rule(..),
 	Term(..),
-	TwoD(..)
+	TwoD(..),
+	Result
 ) where
 
 import PrologTools

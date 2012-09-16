@@ -12,6 +12,8 @@ import Data.Maybe
 import Data.Either
 import Data.List
 import Control.Monad
+import Control.Arrow
+import Control.Applicative
 
 main :: IO ()
 main = do
@@ -24,11 +26,31 @@ main = do
 	let	answer = ask [] [] q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
-	forM_ answer print
+	forM_ (map maValue answer) $ putStrLn . maybe "" showAtom
+	forM_ (map onlyTopVars answer) $ print
 --	putStrLn $ showAnswerAll answer
+
+showAtom :: Atom -> String
+showAtom (LA n) = "la " ++ n
+
+maValue :: Result Scope Atom -> Maybe Atom
+maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
+	[] -> Nothing
+	((_, tv) : _) -> (\(Con v) -> v) <$> tv
+
+isMA :: Term Scope Atom -> Bool
+isMA (Var [_] (KOhA "ma")) = True
+isMA _ = False
 
 showAnswerAll a = if null a then "nago'i" else
 	intercalate " .a " $ map showAnswer $ map (lookupMA . onlyTop) a
+
+onlyTopVars :: Result Scope s -> Result Scope s
+onlyTopVars = filter (not . null . fst) . map (first $ filter isTopVar)
+
+isTopVar :: Term Scope s -> Bool
+isTopVar (Var [_] _) = True
+isTopVar _ = False
 
 lookupMA = map snd . filter ((Var "top" (KOhA "ma") `elem`) . fst)
 

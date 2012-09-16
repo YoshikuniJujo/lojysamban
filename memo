@@ -138,3 +138,7 @@ apply :: Result -> Fact -> Fact
 Prolog2 を作る。
 そのためにまずは Prolog のなかの type や class 等の流用できるものは、
 たとえば PrologTools 等に分けておく。
+
+うまくいった。
+次は ma の答えを表示するようにする。
+そのあとは top の da, de, di, do や xy., .ybu, .alabam bu 等の答えを表示するようにする。
