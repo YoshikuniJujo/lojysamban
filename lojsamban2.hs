@@ -26,7 +26,11 @@ main = do
 	let	answer = ask [] [] q rules
 --	print (rules :: [Rule String Atom])
 --	print (q :: Fact Scope Atom)
-	putStrLn $ unwords $ intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>)
+	putStrLn $ case answer of
+		[] -> "nago'i"
+		_ -> case intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>) of
+			[] -> "go'i"
+			m -> unwords m
 	forM_ (map onlyTopVars answer) $ print
 --	putStrLn $ showAnswerAll answer
 
