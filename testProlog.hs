@@ -3,7 +3,7 @@
 
 module Main where
 
-import Prolog
+import Prolog2
 
 instance TwoD String where
 	next = (++ " next")
@@ -30,7 +30,7 @@ simpleRule = [rule1, rule2, srule3]
 srule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
 	[] [\sc -> [Con "likes", Var sc "X", Var sc "Y"]] []
 
-bug1 = ask "" (\sc -> [Con "friends", Var sc "Who", Var sc "What"]) simpleRule
+-- bug1 = ask "" (\sc -> [Con "friends", Var sc "Who", Var sc "What"]) simpleRule
 
 q1, q2 :: Fact String String
 q1 sc = [Con "likes", Var sc "X", Con "cheese"]
@@ -55,8 +55,8 @@ patfuFact2 sc = [Con "patfu", Con "jon.bois.sr", Con "jon.bois.jr"]
 patfuRule1 :: Rule String String
 patfuRule1 = Rule patfuFact1 [] [] []
 patfuRule2 = Rule patfuFact2 [] [] []
-patfuRule3 = Rule (\sc -> [Con "dzena", Var sc "da", Var sc "de"])
-	[] [\sc -> [Con "patfu", Var sc "da", Var sc "de"]] []
+patfuRule3 = Rule (\sc -> [Con "dzena", Var sc "X", Var sc "Y"])
+	[] [\sc -> [Con "patfu", Var sc "X", Var sc "Y"]] []
 patfuRule4 = Rule (\sc -> [Con "dzena", Var sc "da", Var sc "de"])
 	[] [	\sc -> [Con "patfu", Var sc "da", Var sc "di"],
 		\sc -> [Con "dzena", Var sc "di", Var sc "de"]] []
