@@ -26,18 +26,24 @@ main = do
 		`fmap` getLine
 	let	answer = ask [] [] q rules
 --	print (rules :: [Rule String Atom])
-	print (q [] :: [Term Scope Atom])
-	putStrLn $ case answer of
-		[] -> "nago'i"
+--	print (q [] :: [Term Scope Atom])
+	let	answer2_1 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
+			map ((\ret -> intersperse ".ije" ret) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
+		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
+			map ((\ret -> "tu'e" : intersperse ".ije" ret ++ ["tu'u"]) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
+	putStr $ case answer of
+		[] -> "nago'i\n"
 		_ -> case intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>) of
-			[] -> "go'i"
-			m -> unwords m
-	putStr $ unlines $ map (unwords . map showPair . regularization . onlyTopVars) answer
---	putStr $ unlines $ map show $ map regularization $ map (show . regularization . onlyTopVars) answer
+			[] -> if null answer2 then "go'i\n" else ""
+			m -> unwords m ++ "\n"
+	if null answer2 then return () else
+		if length answer == 1 then putStrLn answer2_1 else putStrLn answer2
+--	putStr $ unlines $ map show $ filter (not . isMA . fst) $ map regularization $ map (show . regularization . onlyTopVars) answer
 --	putStrLn $ showAnswerAll answer
 
 showAtom :: Atom -> String
 showAtom (LA n) = "la " ++ n
+showAtom (LO n) = "lo " ++ n
 
 maValue :: Result Scope Atom -> Maybe Atom
 maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
@@ -53,7 +59,7 @@ showAnswerAll a = if null a then "nago'i" else
 
 showPair :: (Term Scope Atom, Term Scope Atom) -> String
 showPair (Var _ (KOhA k), Con (LO n)) = k ++ " du lo " ++ n
-showPair (Var _ (LerfuString l), Con (LO n)) = l ++ " du l o" ++ n
+showPair (Var _ (LerfuString l), Con (LO n)) = l ++ " du lo " ++ n
 showPair (Var _ (KOhA k), Con (LA n)) = k ++ " du la " ++ n
 showPair (Var _ (LerfuString l), Con (LA n)) = l ++ " du la " ++ n
 
