@@ -1,5 +1,6 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TupleSections #-}
 
 module Main where
 
@@ -25,13 +26,14 @@ main = do
 		`fmap` getLine
 	let	answer = ask [] [] q rules
 --	print (rules :: [Rule String Atom])
---	print (q :: Fact Scope Atom)
+	print (q [] :: [Term Scope Atom])
 	putStrLn $ case answer of
 		[] -> "nago'i"
 		_ -> case intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>) of
 			[] -> "go'i"
 			m -> unwords m
-	forM_ (map onlyTopVars answer) $ print
+	putStr $ unlines $ map (unwords . map showPair . regularization . onlyTopVars) answer
+--	putStr $ unlines $ map show $ map regularization $ map (show . regularization . onlyTopVars) answer
 --	putStrLn $ showAnswerAll answer
 
 showAtom :: Atom -> String
@@ -48,6 +50,17 @@ isMA _ = False
 
 showAnswerAll a = if null a then "nago'i" else
 	intercalate " .a " $ map showAnswer $ map (lookupMA . onlyTop) a
+
+showPair :: (Term Scope Atom, Term Scope Atom) -> String
+showPair (Var _ (KOhA k), Con (LO n)) = k ++ " du lo " ++ n
+showPair (Var _ (LerfuString l), Con (LO n)) = l ++ " du l o" ++ n
+showPair (Var _ (KOhA k), Con (LA n)) = k ++ " du la " ++ n
+showPair (Var _ (LerfuString l), Con (LA n)) = l ++ " du la " ++ n
+
+regularization :: Result sc s -> [(Term sc s, Term sc s)]
+regularization [] = []
+regularization ((_, Nothing) : rest) = regularization rest
+regularization ((vars, Just val) : rest) = map (, val) vars ++ regularization rest
 
 onlyTopVars :: Result Scope s -> Result Scope s
 onlyTopVars = filter (not . null . fst) . map (first $ filter isTopVar)
