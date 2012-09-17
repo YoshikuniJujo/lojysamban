@@ -110,6 +110,8 @@ readSentenceFact s@(TermsBridiTail _ _ _ _) =
 	h sc = map (readSumti sc) $ headTerms s
 	f = readSelbri $ selbri $ bridiTail s
 	t sc = map (readSumti sc) $ tailTerms $ bridiTail s
+readSentenceFact (TopText _ _ _ _ (Just s) _) = readSentenceFact s
+readSentenceFact o = error $ show o
 
 readSentence :: Sentence -> Rule Scope Atom
 readSentence s@(TermsBridiTail _ _ _ _) = Rule (\sc -> f : h sc ++ t sc) [] [] []
