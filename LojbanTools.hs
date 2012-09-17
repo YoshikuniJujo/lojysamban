@@ -83,8 +83,9 @@ bridiTail (TermsBridiTail _ _ _ bt) = bt
 bridiTail o = o
 
 selbri :: Sentence -> Selbri
+selbri (Selbri s) = s
 selbri (SelbriTailTerms s _ _ _) = s
-selbri _ = P.Brivla ([], "", []) []
+selbri t = error $ show t -- P.Brivla ([], "", []) []
 
 tailTerms :: Sentence -> [Sumti]
 tailTerms (SelbriTailTerms _ ts _ _) = ts
