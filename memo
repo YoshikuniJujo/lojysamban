@@ -142,3 +142,8 @@ Prolog2 を作る。
 うまくいった。
 次は ma の答えを表示するようにする。
 そのあとは top の da, de, di, do や xy., .ybu, .alabam bu 等の答えを表示するようにする。
+
+2012.09.18 Tue.
+
+examples を cabal に同梱することにする。
+また、cabal 内に説明を書くようにする。

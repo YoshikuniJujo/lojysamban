@@ -2,7 +2,7 @@ build-type:		Simple
 cabal-version:		>= 1.6
 
 name:			lojysamban
-version:		0.0.1
+version:		0.0.2
 stability:		experimental
 author:			.iocikun.juj. <PAF01143@nifty.ne.jp>
 maintainer:		.iocikun.juj. <PAF01143@nifty.ne.jp>
@@ -19,5 +19,6 @@ source-repository	head
     location:		git://github.com/YoshikuniJujo/lojsamban.git
 
 executable		lojysamban
-    main-is:		lojsamban.hs
+    main-is:		lojsamban2.hs
+    other-modules:	LojbanTools, Prolog2, PrologTools, NotUnif, Unif
     build-depends:	base > 3 && < 5, lojbanParser
