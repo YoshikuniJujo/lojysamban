@@ -17,16 +17,19 @@ description:		Prolog with lojban
     > lojysamban example/pendo.jbo
     > .i ma pendo la .ualeis.
     > .i la gromit
+    > .i co'o
     >
     > lojysamban example/gugde.jbo
     > .i alabam. bu toldu'o misisip. bu boi joji'as. bu boi tenesis. bu boi florid. bu
     > .i tu'e alabam bu du lo kambla .ije joji'as. bu du lo kamxu'e .ije misisip bu
     > du lo kamxu'e .ije tenesis bu du lo kamri'o .ije florid bu du lo kamri'o tu'u
     > .ija tu'e alabam bu du lo kamri'o .ife joji'as bu du lo kamxu'e ...
+    > .i co'o
     >
     > lojysamban example/patfu.jbo
     > .i ma dzena la jon.bois.jr.
     > .i la jon.bois.sr .a la zeb
+    > .i co'o
     .
 extra-source-files:	examples/pendo.jbo, examples/gugde.jbo, examples/patfu.jbo
     examples/cidja.jbo, examples/mlatu.jbo

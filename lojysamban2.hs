@@ -23,13 +23,29 @@ main = do
 	src <- readFile fn
 	let	Right p = parse src
 		rules = map readSentence $ getSentences p
+	whileJust getAsk $ flip ask1 rules
+
+whileJust :: IO (Maybe a) -> (a -> IO b) -> IO ()
+whileJust test action = do
+	p <- test
+	case p of
+		Just x -> action x >> whileJust test action
+		Nothing -> return ()
+
+getAsk :: IO (Maybe (Fact Scope Atom))
+getAsk = do
 	putStr ".i "
 	hFlush stdout
-	Left q <- (readSentenceFact . either (error "bad") id . parse)
-		`fmap` getLine
+	p <- (either (error . show) id . parse) `fmap` getLine
+	let	Left q = readSentenceFact p
+	return $ if isCOhO p then Nothing else Just q
+
+isCOhO (TopText _ _ [VocativeSumti [(_, "co'o", _)] _ _] _ _ _) = True
+isCOhO _ = False
+
+ask1 :: Fact Scope Atom -> [Rule Scope Atom] -> IO ()
+ask1 q rules = do
 	let	answer = ask [] [] q rules
---	print (rules :: [Rule String Atom])
---	print (q [] :: [Term Scope Atom])
 	let	answer2_1 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map ((\ret -> intersperse ".ije" ret) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
 		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
@@ -42,8 +58,6 @@ main = do
 			m -> unwords m ++ "\n"
 	if null answer2 then return () else
 		if length answer == 1 then putStrLn answer2_1 else putStrLn answer2
---	putStr $ unlines $ map show $ filter (not . isMA . fst) $ map regularization $ map (show . regularization . onlyTopVars) answer
---	putStrLn $ showAnswerAll answer
 
 showAtom :: Atom -> String
 showAtom (LA n) = "la " ++ n
