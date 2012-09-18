@@ -19,7 +19,13 @@ import System.IO
 
 main :: IO ()
 main = do
-	[fn] <- getArgs
+	args <- getArgs
+	fn <- case args of
+		[] -> do
+			putStr "Please enter source file name: "
+			hFlush stdout
+			getLine
+		[fn] -> return fn
 	src <- readFile fn
 	let	Right p = parse src
 		rules = map readSentence $ getSentences p
