@@ -13,6 +13,21 @@ license-file:		LICENSE
 category:		Language
 synopsis:		Prolog with lojban
 description:		Prolog with lojban
+    .
+    > lojysamban example/pendo.jbo
+    > .i ma pendo la .ualeis.
+    > .i la gromit
+    >
+    > lojysamban example/gugde.jbo
+    > .i alabam. bu toldu'o misisip. bu boi joji'as. bu boi tenesis. bu boi florid. bu
+    > .i tu'e alabam bu du lo kambla .ije joji'as. bu du lo kamxu'e .ije misisip bu
+    > du lo kamxu'e .ije tenesis bu du lo kamri'o .ije florid bu du lo kamri'o tu'u
+    > .ija tu'e alabam bu du lo kamri'o .ife joji'as bu du lo kamxu'e ...
+    >
+    > lojysamban example/patfu.jbo
+    > .i ma dzena la jon.bois.jr.
+    > .i la jon.bois.sr .a la zeb
+    .
 
 source-repository	head
     type:		git
@@ -22,3 +37,6 @@ executable		lojysamban
     main-is:		lojsamban2.hs
     other-modules:	LojbanTools, Prolog2, PrologTools, NotUnif, Unif
     build-depends:	base > 3 && < 5, lojbanParser
+
+extra-source-files:	examples/pendo.jbo, examples/gugde.jbo, examples/patfu.jbo
+    examples/cidja.jbo, examples/mlatu.jbo

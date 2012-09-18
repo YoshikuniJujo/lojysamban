@@ -15,6 +15,7 @@ import Data.List
 import Control.Monad
 import Control.Arrow
 import Control.Applicative
+import System.IO
 
 main :: IO ()
 main = do
@@ -22,6 +23,8 @@ main = do
 	src <- readFile fn
 	let	Right p = parse src
 		rules = map readSentence $ getSentences p
+	putStr ".i "
+	hFlush stdout
 	Left q <- (readSentenceFact . either (error "bad") id . parse)
 		`fmap` getLine
 	let	answer = ask [] [] q rules
@@ -31,6 +34,7 @@ main = do
 			map ((\ret -> intersperse ".ije" ret) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
 		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map ((\ret -> "tu'e" : intersperse ".ije" ret ++ ["tu'u"]) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
+	putStr ".i "
 	putStr $ case answer of
 		[] -> "nago'i\n"
 		_ -> case intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>) of
@@ -105,7 +109,7 @@ instance TwoD [Int] where
 	down ns = 0 : ns
 
 readSumti :: Scope -> Sumti -> Term Scope Atom
-readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ concat $ map snd3 ns
+readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ intercalate "." $ map snd3 ns
 readSumti sc (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti sc (P.KOhA (_, k, _) _) = Var sc $ KOhA k
 readSumti sc (P.LerfuString s _ _) = Var sc $ LerfuString $ concatMap snd3 s
