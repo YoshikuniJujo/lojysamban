@@ -15,6 +15,7 @@ import Data.Either
 import Data.List
 
 getSentences :: Sentence -> [Sentence]
+getSentences (TopText _ _ _ _ (Just t) _) = getSentences t
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
 getSentences (StatementI s1 ss) = s1 : catMaybes (map (\(_, _, s) -> s) ss)
 getSentences tbt@(TermsBridiTail _ _ _ _) = [tbt]

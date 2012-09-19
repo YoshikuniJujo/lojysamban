@@ -20,16 +20,19 @@ import System.IO
 main :: IO ()
 main = do
 	args <- getArgs
-	fn <- case args of
-		[] -> do
-			putStr "Please enter source file name: "
-			hFlush stdout
-			getLine
-		[fn] -> return fn
-	src <- readFile fn
+	src <- case args of
+		[] -> readFacts
+		[fn] -> readFile fn
 	let	Right p = parse src
 		rules = map readSentence $ getSentences p
 	whileJust getAsk $ flip ask1 rules
+
+readFacts :: IO String
+readFacts = do
+	l <- getLine
+	if "fa'o" `isInfixOf` l then return l else do
+		ls <- readFacts
+		return $ l ++ ls
 
 whileJust :: IO (Maybe a) -> (a -> IO b) -> IO ()
 whileJust test action = do
