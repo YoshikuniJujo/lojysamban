@@ -170,8 +170,12 @@ readSentence (IJoikJek s [r]) = Rule f [] (getRule r) (getNotRule r)
 	Left f = readSentenceFact s
 
 getRule (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
-	lefts $ readTUhE t
+	lefts $ readRule t
 getNotRule (_, Jek _ _ (_, "ja", _) (Just (_, "nai", _)), _, Just t) =
-	rights $ readTUhE t
+	rights $ readRule t
+
+readRule t@(TUhE _ _ _ _ _ _) = readTUhE t
+readRule t = [readSentenceFact t]
 
 readTUhE (TUhE _ _ _ t _ _) = map readSentenceFact $ getSentences t
+readTUhE o = error $ show o
