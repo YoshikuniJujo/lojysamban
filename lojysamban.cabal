@@ -50,6 +50,7 @@ source-repository	head
     location:		git://github.com/YoshikuniJujo/lojysamban.git
 
 executable		lojysamban
+    hs-source-dirs:	src
     main-is:		lojysamban2.hs
     other-modules:	LojbanTools, Prolog2, PrologTools, NotUnif, Unif
     build-depends:	base > 3 && < 5, lojbanParser >= 0.1.2
