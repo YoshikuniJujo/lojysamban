@@ -3,7 +3,7 @@ cabal-version:		>= 1.6
 
 name:			lojysamban
 version:		0.0.8
-stability:		experimental
+stability:		alpha
 author:			.iocikun.juj. <PAF01143@nifty.ne.jp>
 maintainer:		.iocikun.juj. <PAF01143@nifty.ne.jp>
 homepage:		http://homepage3.nifty.com/salamander/myblog/lojysamban.html
