@@ -30,7 +30,7 @@ description:		Prolog with lojban
     > .i la gromit
     > .i co'o
     >
-    > lojysamban example/gugde.jbo
+    > lojysamban example/skari.jbo
     > .i alabam. bu toldu'o misisip. bu boi joji'as. bu boi tenesis. bu boi florid. bu
     > .i tu'e alabam bu du lo kambla .ije joji'as. bu du lo kamxu'e .ije misisip bu
     > du lo kamxu'e .ije tenesis bu du lo kamri'o .ije florid bu du lo kamri'o tu'u
@@ -42,7 +42,7 @@ description:		Prolog with lojban
     > .i la jon.bois.sr .a la zeb
     > .i co'o
     .
-extra-source-files:	examples/pendo.jbo, examples/gugde.jbo, examples/patfu.jbo
+extra-source-files:	examples/pendo.jbo, examples/skari.jbo, examples/patfu.jbo
     examples/cidja.jbo, examples/mlatu.jbo
 
 source-repository	head
