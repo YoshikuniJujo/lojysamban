@@ -11,7 +11,7 @@ import Control.Applicative
 import Data.List hiding (deleteBy)
 import Data.Maybe
 
-data Term sc s = Con s | Var sc s deriving (Eq, Show)
+data Term sc s = Con s | Var sc s | List [Term sc s] deriving (Eq, Show)
 
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 

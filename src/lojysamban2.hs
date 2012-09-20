@@ -6,7 +6,7 @@ module Main where
 
 import LojbanTools
 import Prolog2
-import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString)
+import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString, LI)
 import qualified Language.Lojban.Parser as P
 import System.Environment
 import Data.Maybe
@@ -71,6 +71,7 @@ ask1 q rules = do
 showAtom :: Atom -> String
 showAtom (LA n) = "la " ++ n
 showAtom (LO n) = "lo " ++ n
+showAtom (LI n) = "li " ++ show n
 
 maValue :: Result Scope Atom -> Maybe Atom
 maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
@@ -123,6 +124,7 @@ data Atom
 	| Brivla String
 	| GOhA String
 	| LerfuString String
+	| LI Int
 	deriving (Show, Eq)
 
 type Scope = [Int]
@@ -136,6 +138,25 @@ readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ intercalate "." $ map snd
 readSumti sc (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti sc (P.KOhA (_, k, _) _) = Var sc $ KOhA k
 readSumti sc (P.LerfuString s _ _) = Var sc $ LerfuString $ concatMap snd3 s
+readSumti sc (P.LI (_, "li", _) _ (Number ns _ _) _ _) = Con $ LI $ readNumber ns
+readSumti sc (JoikEkSumti s ss) = List $ readSumti sc s : readCEhOTail sc ss
+readSumti _ o = error $ show o
+
+readCEhOTail :: Scope -> [(JoikJek, [Free], Sumti)] -> [Term Scope Atom]
+readCEhOTail sc [] = []
+readCEhOTail sc ((JOI _ (_, "ce'o", _) _, _, s) : rest) =
+	readSumti sc s : readCEhOTail sc rest
+
+readNumber :: [([String], String, [[([String], String)]])] -> Int
+readNumber = readTen 0 . map snd3
+
+paList = [
+	("no", 0), ("pa", 1), ("re", 2), ("ci", 3), ("vo", 4),
+	("0", 0), ("1", 1), ("2", 2), ("3", 3), ("4", 4)]
+
+readTen :: Int -> [String] -> Int
+readTen ret [] = ret
+readTen ret (n : rest) = readTen (ret * 10 + fromJust (lookup n paList)) rest
 
 readSumtiTail :: SumtiTail -> String
 readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n

@@ -180,3 +180,25 @@ README の作成
 
 また Haskell 的な IO monad の考え方を取り入れたいと思うが、
 どうやったらうまく merge できるだろうか。
+
+[a, b, c] は .abu ce'o by. ce'o cy. でいいと思う。
+a : [b, c] をどう表現しようか。
+lo te ziljmina be .abu bei by. ce'o cy. ってところか。
+joi があれば良いのだが。
+あるいは lo terziljmina be .abu bei by. ce'o cy. か。
+そうすると a : b : c : [] はどうなるか。
+[] は lo kunti なので、
+lo terziljmina be .abu bei lo terziljmina be by. bei lo terziljmina be cy. bei
+lo kunti か。
+長いな。
+しかし terziljmina は ++ にも使いたいし、困ったな。
+むしろ cmima を使うとか。
+しかし、これは rest の入る場所がないからだめだ。
+selzilvimcu が使えるかな。
+lo selzilvi'u be .abu bei by. ce'o cy. かな。
+
+List 同士の unification は、
+展開して unification し、それを merge すればいいだろう。
+List と Con の unification は失敗とする。
+List と変数の unification は List を Con のように扱えば良いように思うが、
+これはうまくいくだろうか。
