@@ -152,3 +152,31 @@ examples を cabal に同梱することにする。
 
 引数無しで起動したときの動作を変える。
 定義を入力して、fa'o で終える。
+
+2012.09.20 Thu.
+
+README の作成
+
+例えば以下のような例が可能であるか考えること。
+.i da rirni de .ijanai da patfu de
+.i da rirni de .ijanai da mamta de
+.i da nanmu .ijanai da patfu de
+.i da ninmu .ijanai da mamta de
+.i da patfu de .ijanai tu'e da nanmu .i da rirni de tu'u
+.i da mamta de .ijanai tu'e da ninmu .i da rirni de
+今の実装では無限ループになってしまう。
+これを解決するきれいな方法はあるか。
+
+定義されていない事実に対する返答は nago'i で良いか。
+あるいは「知らない」とするべきか。
+前者とするとしたらその根拠は、Prolog における論理空間が、
+偽からはじまり or 結合であり、自然言語の論理空間は真ではじまり and 結合である
+ということになるだろうが、それをきちんと論証する必要がある。
+
+タプルやリストを lojban でどう表現しようか。
+セットを表現するやりかたをまず調べる。
+とりあえず重要性の高いのはリストなのでそちらを先に実装しよう。
+タプルは必ずしも必要ではないと思う。
+
+また Haskell 的な IO monad の考え方を取り入れたいと思うが、
+どうやったらうまく merge できるだろうか。
