@@ -202,3 +202,8 @@ List 同士の unification は、
 List と Con の unification は失敗とする。
 List と変数の unification は List を Con のように扱えば良いように思うが、
 これはうまくいくだろうか。
+
+2012.09.21 Fri.
+
+そろそろ、コードが限界に達したようだ。
+リファクタリングを始める必要がある。

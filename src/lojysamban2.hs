@@ -59,10 +59,12 @@ ask1 q rules = do
 			map ((\ret -> intersperse ".ije" ret) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
 		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map ((\ret -> "tu'e" : intersperse ".ije" ret ++ ["tu'u"]) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
+	print answer
 	putStr ".i "
 	putStr $ case answer of
 		[] -> "nago'i\n"
-		_ -> case intersperse ".a" $ catMaybes $ (flip map) (map maValue answer) $ (showAtom <$>) of
+		_ -> case intersperse ".a" $ catMaybes $
+			(flip map) (map maValue answer) $ (showAtom <$>) of
 			[] -> if null answer2 then "go'i\n" else ""
 			m -> unwords m ++ "\n"
 	if null answer2 then return () else
