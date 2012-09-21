@@ -1,13 +1,9 @@
-module Unif (
-	unification,
-	merge,
-	Term(..),
-	Result
-) where
+module Unif (Result, Term(..), merge, unification) where
 
-import Control.Applicative
-import Data.List hiding (deleteBy)
-import Data.Maybe
+import Data.List(intersect, union)
+import Data.Maybe -- (catMaybes)
+import Control.Applicative((<$>))
+import Control.Monad
 
 data Term sc s
 	= Con s
@@ -20,51 +16,28 @@ type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
 merge [] uss = Just $ simplify2All uss
-merge (tsv@(ts, v1) : tss) uss = case us of
+merge (tsv@(ts, v1) : tss) uss = case filterElems ts uss of
 	[] -> merge tss $ tsv : uss
-	(us', v2) : rest -> case mergeValue v1 v2 of
-		Nothing -> Nothing
-		Just v	| not $ allEqual $ v2 : map snd rest -> Nothing
-			| otherwise -> merge tss $
-				(foldr (union .fst) ( ts `union` us') rest, v) : uss'
+	ps -> do
+		ret <- foldM mergeValue v1 $ map snd ps
+		merge tss $ (foldr (union . fst) ts ps, ret) : deleteElems ts uss
 	where
-	us = filterElems ts uss
-	uss' = deleteElems' ts uss
-
-allEqual :: Eq a => [a] -> Bool
-allEqual [_] = True
-allEqual (x : y : xs) = x == y && allEqual (y : xs)
-allEqual _ = error "empty"
-
-mergeValue :: Eq a => Maybe a -> Maybe a -> Maybe (Maybe a)
-mergeValue x@(Just _) y@(Just _)
-	| x == y = Just x
-	| otherwise = Nothing
-mergeValue x@(Just _) _ = Just x
-mergeValue _ y = Just y
+	filterElems xs = filter (not . null . intersect xs . fst)
+	mergeValue x@(Just _) y@(Just _)
+		| x == y = Just x
+		| otherwise = Nothing
+	mergeValue x@(Just _) _ = Just x
+	mergeValue _ y = Just y
+	deleteElems xs = filter $ \ys -> null $ intersect xs $ fst ys
 
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification ts us = simplify2All <$> (simplify =<< unifies ts us)
--- unification ts us = (simplify =<< unifies ts us)
 
 unify :: (Eq sc, Eq s) =>
 	Term sc s -> Term sc s -> Maybe (Maybe (Term sc s, Term sc s))
 unify t u | t == u = Just Nothing
 unify (Con _) (Con _) = Nothing
 unify t u = Just $ Just (t, u)
-
--- testL1, testL2 :: Term
-{-
-testL1 = List [Var "" "x", Var "" "y", Var "" "z"]
-testL2 = List [Con "1", Con "2", Con "3"]
-testX = Var "" "X"
-testUnifL = [testL1, testL2]
-testUnifX = [testX, testX]
-
-testCns1 = Cons (Var "" "x") (Var "" "xs")
-testUnifC1 = [testL1, testCns1]
-testUnifC2 = [testL2, testCns1]
--}
 
 unifies :: (Eq sc, Eq s) =>
 	[Term sc s] -> [Term sc s] -> Maybe [(Term sc s, Term sc s)]
@@ -84,19 +57,6 @@ unifies _ _ = Nothing
 -- (Var _, Var _), (Con _, Var _), (Var _, Con _)
 -- simplified form is bellow
 -- [([X, A, Y], Nothing), ([Z, B], Just hoge)]
-
--- test data
--- a, b, x, y, hoge :: Term
-{-
-abu = Var "" "A"
-by = Var "" "B"
-xy = Var "" "X"
-ybu = Var "" "Y"
-zy = Var "" "Z"
-hoge = Con "hoge"
-before :: [(Term String String, Term String String)]
-before = [(xy, abu), (abu, ybu), (by, zy), (hoge, by)]
--}
 
 simplify2All :: (Eq sc, Eq s) => Result sc s -> Result sc s
 simplify2All ps
@@ -195,9 +155,6 @@ simplify ((t, u) : ps) = case simplify ps of
 		Just (us, _) -> Just $ (us, Just t) : deleteElem u ps'
 		_ -> Just $ ([u], Just t) : ps'
 
-deleteElems' :: Eq a => [a] -> [([a], b)] -> [([a], b)]
-deleteElems' xs = filter $ \ys -> null $ intersect xs $ fst ys
-
 {-
 deleteElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
 deleteElems = deleteBy $ \x y -> not $ null $ intersect x y
@@ -214,9 +171,6 @@ deleteElem _ [] = []
 deleteElem x ((xs, y) : ps)
 	| x `elem` xs = ps
 	| otherwise = (xs, y) : deleteElem x ps
-
-filterElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
-filterElems xs = filter (not . null . intersect xs . fst)
 
 {-
 lookupElems :: Eq a => [a] -> [([a], b)] -> Maybe ([a], b)
