@@ -60,6 +60,10 @@ testX = Var "" "X"
 testUnifL = [testL1, testL2]
 testUnifX = [testX, testX]
 
+testCns1 = Cons (Var "" "x") (Var "" "xs")
+testUnifC1 = [testL1, testCns1]
+testUnifC2 = [testL2, testCns1]
+
 -- unifies :: [Term] -> [Term] -> Maybe [(Term, Term)]
 unifies [] [] = Just []
 unifies (List ts1 : ts) (List us1 : us) = do
@@ -149,17 +153,22 @@ simplify ((t@(Var _ _), u@(List us)) : ps) = case simplify ps of
 		Just (ts, Just (List l)) -> case simplify =<< unifies l us of
 			Nothing -> Nothing
 			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
+		Just (ts, Just (Cons uh ut)) -> case simplify =<< unifies [head us, List $ tail us] [uh, ut] of
+			Nothing -> Nothing
+			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
 		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
 		_ -> Just $ ([t], Just u) : ps'
 simplify ((t@(List _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
-{-
-simplify ((t@(Var _), u@(Cons uh ut)) : ps) = case simplify ps of
+simplify ((t@(Var _ _), u@(Cons uh ut)) : ps) = case simplify ps of
 	Nothing -> Nothing
 	Just ps' -> case lookupElem t ps' of
 		Just (ts, Just (Con _)) -> Nothing
-		Just (ts, Just (List l)) -> case simplify =<< unifies l us
+		Just (ts, Just (List (h:l))) -> case simplify =<< unifies [h, List l] [uh, ut] of
+			Nothing -> Nothing
+			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
+		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
+		_ -> Just $ ([t], Just u) : ps'
 simplify ((t@(Cons _ _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
--}
 simplify ((t@(Var _ _), u) : ps) = case simplify ps of
 	Nothing -> Nothing
 	Just ps' -> case lookupElem t ps' of

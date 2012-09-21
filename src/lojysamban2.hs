@@ -72,13 +72,15 @@ showAtom :: Atom -> String
 showAtom (LA n) = "la " ++ n
 showAtom (LO n) = "lo " ++ n
 showAtom (LI n) = "li " ++ show n
+showAtom (ListA []) = "lo kunti"
+showAtom (ListA ns) = unwords $ intersperse "ce'o" $ map showAtom ns
 
 maValue :: Result Scope Atom -> Maybe Atom
 maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
 	[] -> Nothing
 	((_, tv) : _) -> flip (<$>) tv $ \tv' -> case tv' of
 		Con v -> v
-		List vs -> error $ show vs
+		List vs -> ListA $ map (\(Con v) -> v) $ vs
 
 isMA :: Term Scope Atom -> Bool
 isMA (Var [_] (KOhA "ma")) = True
@@ -94,7 +96,12 @@ showPair (Var _ (KOhA k), Con (LA n)) = k ++ " du la " ++ n
 showPair (Var _ (LerfuString l), Con (LA n)) = l ++ " du la " ++ n
 showPair (Var _ (KOhA k), Con (LI n)) = k ++ " du li " ++ show n
 showPair (Var _ (LerfuString l), Con (LI n)) = l ++ " du li " ++ show n
+showPair (Var _ (LerfuString l), List vs) = l ++ " du " ++ unwords (intersperse "ce'o" $ map showTerm vs)
 showPair o = show o
+
+showTerm :: Term Scope Atom -> String
+showTerm (Con (LI n)) = "li " ++ show n
+showTerm (Con (LA n)) = "la " ++ n
 
 regularization :: Result sc s -> [(Term sc s, Term sc s)]
 regularization [] = []
@@ -130,6 +137,7 @@ data Atom
 	| GOhA String
 	| LerfuString String
 	| LI Int
+	| ListA [Atom]
 	deriving (Show, Eq)
 
 type Scope = [Int]
@@ -140,6 +148,9 @@ instance TwoD [Int] where
 
 readSumti :: Scope -> Sumti -> Term Scope Atom
 readSumti sc (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ intercalate "." $ map snd3 ns
+readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (P.Brivla (_, "kunti", _) _) _) _ _) = List []
+readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla (_, "selzilvi'u", _) _) (BE (_, "be", _) _ s1 (Just (BEI (_, "bei", _) _ s2 _))
+	_ _)) _) _ _) = Cons (readSumti sc s1) (readSumti sc s2)
 readSumti sc (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti sc (P.KOhA (_, k, _) _) = Var sc $ KOhA k
 readSumti sc (P.LerfuString s _ _) = Var sc $ LerfuString $ concatMap snd3 s
