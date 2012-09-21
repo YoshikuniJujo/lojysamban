@@ -9,8 +9,7 @@ module LojysambanLib (
 	readQuestion,
 	ask1,
 	isCOhO,
-	readSentence,
-	readFacts
+	readSentence
 ) where
 
 import LojbanTools
@@ -31,16 +30,12 @@ readQuestion :: String -> Fact Scope Atom
 readQuestion =
 	(\(Left q) -> q) . readSentenceFact . either (error . show) id . parse
 
-readFacts :: IO String
-readFacts = do
-	l <- getLine
-	if "fa'o" `isInfixOf` l then return l else do
-		ls <- readFacts
-		return $ l ++ ls
+isCOhO :: String -> Bool
+isCOhO = isCOhO' . either (error . show) id . parse
 
-isCOhO :: Sentence -> Bool
-isCOhO (TopText _ _ [VocativeSumti [(_, "co'o", _)] _ _] _ _ _) = True
-isCOhO _ = False
+isCOhO' :: Sentence -> Bool
+isCOhO' (TopText _ _ [VocativeSumti [(_, "co'o", _)] _ _] _ _ _) = True
+isCOhO' _ = False
 
 ask1 :: Fact Scope Atom -> [Rule Scope Atom] -> IO ()
 ask1 q rules = do

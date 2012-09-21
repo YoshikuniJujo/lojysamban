@@ -1,13 +1,11 @@
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TupleSections #-}
-
 module Main where
 
-import LojysambanLib
-import System.Environment
-import System.IO
-import Control.Monad.Tools
+import System.IO(hFlush, stdout)
+import System.Environment(getArgs)
+import Control.Monad.Tools(doWhile_)
+import Data.List(isInfixOf)
+
+import LojysambanLib(ask1, readQuestion, readRules, isCOhO)
 
 main :: IO ()
 main = do
@@ -16,11 +14,15 @@ main = do
 		[] -> readFacts
 		[fn] -> readFile fn
 		_ -> error "bad arguments"
-	let	rules = readRules src
 	doWhile_ $ do
-		putStr ".i "
-		hFlush stdout
-		l <- getLine
-		let	p' = either (error . show) id $ parse l
-		if isCOhO p' then return False else
-			ask1 (readQuestion l) rules >> return True
+		l <- putStr ".i " >> hFlush stdout >> getLine
+		if isCOhO l then return False else do
+			ask1 (readQuestion l) (readRules src)
+			return True
+
+readFacts :: IO String
+readFacts = do
+	l <- getLine
+	if "fa'o" `isInfixOf` l then return l else do
+		ls <- readFacts
+		return $ l ++ ls
