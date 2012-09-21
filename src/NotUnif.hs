@@ -1,4 +1,8 @@
 module NotUnif (
+	merge,
+	Result,
+	unification,
+	Term(..),
 	checkAll,
 	checkNot,
 	deleteFromNot,

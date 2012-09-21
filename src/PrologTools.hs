@@ -2,6 +2,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module PrologTools (
+	Term(..),
+	merge,
+	unification,
+	Result,
 	TwoD(..),
 	Fact,
 	NotFact,
@@ -10,7 +14,6 @@ module PrologTools (
 	checkAll
 ) where
 
-import Unif
 import NotUnif
 import Control.Applicative
 

@@ -1,7 +1,6 @@
 module Prolog2 (
 	ask,
 	Fact,
---	Unify(..),
 	Rule(..),
 	Term(..),
 	TwoD(..),
@@ -9,7 +8,6 @@ module Prolog2 (
 ) where
 
 import PrologTools
-import Unif
 import Data.Maybe
 
 ask :: (TwoD sc, Eq sc, Eq s) =>
