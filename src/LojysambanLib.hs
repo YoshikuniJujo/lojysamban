@@ -19,7 +19,6 @@ import qualified Language.Lojban.Parser as P
 import Data.Maybe
 import Data.Either
 import Data.List
-import Control.Monad
 import Control.Arrow
 import Control.Applicative
 
@@ -37,10 +36,10 @@ isCOhO' :: Sentence -> Bool
 isCOhO' (TopText _ _ [VocativeSumti [(_, "co'o", _)] _ _] _ _ _) = True
 isCOhO' _ = False
 
-ask1 :: Fact Scope Atom -> [Rule Scope Atom] -> IO ()
-ask1 q rules = do
+ask1 :: Fact Scope Atom -> [Rule Scope Atom] -> String
+ask1 q rules =
 	let	answer = ask [] [] q rules
-	let	answer2_1 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
+		answer2_1 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map (intersperse ".ije" . map showPair .
 			filter (not . isMA . fst) . regularization . onlyTopVars) answer
 		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
@@ -48,15 +47,18 @@ ask1 q rules = do
 				map showPair . filter (not . isMA . fst) .
 					regularization . onlyTopVars) answer
 --	print answer
-	putStr ".i "
-	putStr $ case answer of
-		[] -> "nago'i\n"
-		_ -> case intersperse ".a" $ mapMaybe
-			((showAtom <$>) . maValue) answer of
-			[] -> if null answer2 then "go'i\n" else ""
-			m -> unwords m ++ "\n"
-	unless (null answer2) $
-		if length answer == 1 then putStrLn answer2_1 else putStrLn answer2
+--	print answer2_1
+--	print answer2
+--	putStr ".i "
+		result1 = ".i " ++ case answer of
+			[] -> "nago'i\n"
+			_ -> case intersperse ".a" $ mapMaybe
+				((showAtom <$>) . maValue) answer of
+				[] -> if null answer2 then "go'i\n" else ""
+				m -> unwords m ++ "\n"
+	in
+	result1 ++ if (null answer2) then "" else
+		if length answer == 1 then answer2_1 else answer2
 
 showAtom :: Atom -> String
 showAtom (LA n) = "la " ++ n

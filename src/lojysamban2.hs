@@ -17,7 +17,7 @@ main = do
 	doWhile_ $ do
 		l <- putStr ".i " >> hFlush stdout >> getLine
 		if isCOhO l then return False else do
-			ask1 (readQuestion l) (readRules src)
+			putStrLn $ ask1 (readQuestion l) (readRules src)
 			return True
 
 readFacts :: IO String
