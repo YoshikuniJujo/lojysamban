@@ -54,3 +54,4 @@ executable		lojysamban
     main-is:		lojysamban2.hs
     other-modules:	LojbanTools, Prolog2, PrologTools, NotUnif, Unif
     build-depends:	base > 3 && < 5, lojbanParser >= 0.1.2
+    ghc-options:	-Wall
