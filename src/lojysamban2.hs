@@ -4,6 +4,7 @@
 
 module Main where
 
+import LojysambanLib
 import LojbanTools
 import Prolog2
 import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString, LI)
@@ -16,6 +17,7 @@ import Control.Monad
 import Control.Arrow
 import Control.Applicative
 import System.IO
+import Control.Monad.Tools
 
 main :: IO ()
 main = do
@@ -26,7 +28,20 @@ main = do
 		_ -> error "bad arguments"
 	let	Right p = parse src
 		rules = map readSentence $ getSentences p
-	whileJust getAsk $ flip ask1 rules
+	doWhile_ $ do
+		putStr ".i "
+		hFlush stdout
+		l <- getLine
+		let	p' = either (error . show) id $ parse l
+		if isCOhO p' then return False else
+			ask1 (readQuestion l) rules >> return True
+
+readRules :: String -> [Rule Scope Atom]
+readRules = map readSentence . getSentences . (\(Right p) -> p) . parse
+
+readQuestion :: String -> Fact Scope Atom
+readQuestion =
+	(\(Left q) -> q) . readSentenceFact . either (error . show) id . parse
 
 readFacts :: IO String
 readFacts = do
@@ -61,7 +76,7 @@ ask1 q rules = do
 			map (intersperse ".ije" . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
 		answer2 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map ((\ret -> "tu'e" : intersperse ".ije" ret ++ ["tu'u"]) . map showPair . filter (not . isMA . fst) . regularization . onlyTopVars) answer
-	print answer
+--	print answer
 	putStr ".i "
 	putStr $ case answer of
 		[] -> "nago'i\n"
