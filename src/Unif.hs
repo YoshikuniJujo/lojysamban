@@ -11,7 +11,12 @@ import Control.Applicative
 import Data.List hiding (deleteBy)
 import Data.Maybe
 
-data Term sc s = Con s | Var sc s | List [Term sc s] deriving (Eq, Show)
+data Term sc s
+	= Con s
+	| Var sc s
+	| List [Term sc s]
+	| Cons (Term sc s) (Term sc s)
+	deriving (Eq, Show)
 
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
@@ -48,8 +53,19 @@ unify t u | t == u = Just Nothing
 unify t@(Con _) u@(Con _) = Nothing
 unify t u = Just $ Just (t, u)
 
+-- testL1, testL2 :: Term
+testL1 = List [Var "" "x", Var "" "y", Var "" "z"]
+testL2 = List [Con "1", Con "2", Con "3"]
+testX = Var "" "X"
+testUnifL = [testL1, testL2]
+testUnifX = [testX, testX]
+
 -- unifies :: [Term] -> [Term] -> Maybe [(Term, Term)]
 unifies [] [] = Just []
+unifies (List ts1 : ts) (List us1 : us) = do
+	r1 <- unifies ts1 us1
+	r2 <- unifies ts us
+	return $ r1 ++ r2
 unifies (t : ts) (u : us) = case unify t u of
 	Nothing -> Nothing
 	Just Nothing -> unifies ts us
@@ -126,6 +142,24 @@ simplify ((t@(Var _ _), u@(Var _ _)) : ps) = case simplify ps of
 		(Just (ts, v1), _) -> Just $ (u : ts, v1) : deleteElem t ps'
 		(_, Just (us, v2)) -> Just $ (t : us, v2) : deleteElem u ps'
 		(_, _) -> Just $ ([t, u], Nothing) : ps'
+simplify ((t@(Var _ _), u@(List us)) : ps) = case simplify ps of
+	Nothing -> Nothing
+	Just ps' -> case lookupElem t ps' of
+		Just (ts, Just (Con _)) -> Nothing
+		Just (ts, Just (List l)) -> case simplify =<< unifies l us of
+			Nothing -> Nothing
+			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
+		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
+		_ -> Just $ ([t], Just u) : ps'
+simplify ((t@(List _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
+{-
+simplify ((t@(Var _), u@(Cons uh ut)) : ps) = case simplify ps of
+	Nothing -> Nothing
+	Just ps' -> case lookupElem t ps' of
+		Just (ts, Just (Con _)) -> Nothing
+		Just (ts, Just (List l)) -> case simplify =<< unifies l us
+simplify ((t@(Cons _ _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
+-}
 simplify ((t@(Var _ _), u) : ps) = case simplify ps of
 	Nothing -> Nothing
 	Just ps' -> case lookupElem t ps' of

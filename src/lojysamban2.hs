@@ -76,7 +76,9 @@ showAtom (LI n) = "li " ++ show n
 maValue :: Result Scope Atom -> Maybe Atom
 maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
 	[] -> Nothing
-	((_, tv) : _) -> (\(Con v) -> v) <$> tv
+	((_, tv) : _) -> flip (<$>) tv $ \tv' -> case tv' of
+		Con v -> v
+		List vs -> error $ show vs
 
 isMA :: Term Scope Atom -> Bool
 isMA (Var [_] (KOhA "ma")) = True
@@ -90,6 +92,9 @@ showPair (Var _ (KOhA k), Con (LO n)) = k ++ " du lo " ++ n
 showPair (Var _ (LerfuString l), Con (LO n)) = l ++ " du lo " ++ n
 showPair (Var _ (KOhA k), Con (LA n)) = k ++ " du la " ++ n
 showPair (Var _ (LerfuString l), Con (LA n)) = l ++ " du la " ++ n
+showPair (Var _ (KOhA k), Con (LI n)) = k ++ " du li " ++ show n
+showPair (Var _ (LerfuString l), Con (LI n)) = l ++ " du li " ++ show n
+showPair o = show o
 
 regularization :: Result sc s -> [(Term sc s, Term sc s)]
 regularization [] = []
