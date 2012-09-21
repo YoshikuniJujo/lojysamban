@@ -26,8 +26,7 @@ merge (tsv@(ts, v1) : tss) uss = case us of
 		Nothing -> Nothing
 		Just v	| not $ allEqual $ v2 : map snd rest -> Nothing
 			| otherwise -> merge tss $
-				(foldr union (union ts us') $
-					map fst rest, v) : uss'
+				(foldr (union .fst) ( ts `union` us') rest, v) : uss'
 	where
 	us = filterElems ts uss
 	uss' = deleteElems' ts uss
@@ -111,7 +110,7 @@ notDup' :: Eq a => [Maybe a] -> Bool
 notDup' [] = True
 notDup' (Nothing : xs) = notDup' xs
 notDup' (Just x : xs)
-	| x `elem` (catMaybes xs) = False
+	| x `elem` catMaybes xs = False
 	| otherwise = notDup' xs
 
 {-
@@ -144,14 +143,14 @@ simplify ((t@(Var _ _), u@(Var _ _)) : ps) = case simplify ps of
 	Nothing -> Nothing
 	Just ps' -> case (lookupElem t ps', lookupElem u ps') of
 		(Just (ts, Just v1), Just (us, Just v2))
-			| v1 == v2 -> Just $ (union ts us, Just v1) :
+			| v1 == v2 -> Just $ (ts `union` us, Just v1) :
 				deleteElem t (deleteElem u ps')
 			| otherwise -> Nothing
 		(Just (ts, Just v1), Just (us, _)) ->
-			Just $ (union ts us, Just v1) :
+			Just $ (ts `union` us, Just v1) :
 				deleteElem t (deleteElem u ps')
 		(Just (ts, _), Just (us, v2)) ->
-			Just $ (union ts us, v2) :
+			Just $ (ts `union` us, v2) :
 				deleteElem t (deleteElem u ps')
 		(Just (ts, v1), _) -> Just $ (u : ts, v1) : deleteElem t ps'
 		(_, Just (us, v2)) -> Just $ (t : us, v2) : deleteElem u ps'
@@ -217,7 +216,7 @@ deleteElem x ((xs, y) : ps)
 	| otherwise = (xs, y) : deleteElem x ps
 
 filterElems :: Eq a => [a] -> [([a], b)] -> [([a], b)]
-filterElems xs = filter (\ys -> not $ null $ intersect xs $ fst ys)
+filterElems xs = filter (not . null . intersect xs . fst)
 
 {-
 lookupElems :: Eq a => [a] -> [([a], b)] -> Maybe ([a], b)
