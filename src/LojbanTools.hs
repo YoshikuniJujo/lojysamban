@@ -8,17 +8,13 @@ module LojbanTools (
 ) where
 
 import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString)
-import qualified Language.Lojban.Parser as P
-import System.Environment
 import Data.Maybe
-import Data.Either
-import Data.List
 
 getSentences :: Sentence -> [Sentence]
 getSentences (TopText _ _ _ _ (Just t) _) = getSentences t
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
-getSentences (StatementI s1 ss) = s1 : catMaybes (map (\(_, _, s) -> s) ss)
-getSentences tbt@(TermsBridiTail _ _ _ _) = [tbt]
+getSentences (StatementI s1 ss) = s1 : mapMaybe (\(_, _, s) -> s) ss
+getSentences tbt@(TermsBridiTail{}) = [tbt]
 getSentences o = error $ show o
 
 headTerms :: Sentence -> [Sumti]
@@ -38,9 +34,11 @@ tailTerms :: Sentence -> [Sumti]
 tailTerms (SelbriTailTerms _ ts _ _) = ts
 tailTerms _ = []
 
+{-
 readSumtiTail :: SumtiTail -> String
 readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n
 readSumtiTail st = show st
+-}
 
 snd3 :: (a, b, c) -> b
 snd3 (_, y, _) = y
