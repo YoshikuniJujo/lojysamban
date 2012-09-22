@@ -16,7 +16,9 @@ import Data.List
 import Control.Arrow
 import Control.Applicative
 
+end :: String -> Bool
 end = isFAhO
+ask :: String -> [Rule Scope Atom] -> Maybe String
 ask = question
 
 isFAhO :: String -> Bool
