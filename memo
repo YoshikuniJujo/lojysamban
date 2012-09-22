@@ -207,3 +207,7 @@ List と変数の unification は List を Con のように扱えば良いよう
 
 そろそろ、コードが限界に達したようだ。
 リファクタリングを始める必要がある。
+
+2012.09.22 Sat.
+
+Unif.hs の merge を refactoring 中だが。
