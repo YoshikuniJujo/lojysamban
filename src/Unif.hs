@@ -1,7 +1,7 @@
 module Unif (Term(..), Result, merge, unification, unify) where
 
 import Data.List(intersect, union)
-import Data.Maybe(catMaybes)
+import Data.Maybe
 import Control.Applicative((<$>))
 import Control.Monad(foldM)
 
@@ -30,14 +30,14 @@ merge (tsv@(ts, v1) : tss) uss = case filterElems ts uss of
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification ts us = simplify2All <$> (simplify =<< unifies ts us)
 
-unify :: (Eq sc, Eq s) =>
-	Term sc s -> Term sc s -> Maybe [(Term sc s, Term sc s)]
+unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Result sc s)
 unify t u | t == u = Just []
 unify (Con _) (Con _) = Nothing
-unify t u = Just [(t, u)]
+unify t@(Var _ _) u@(Var _ _) = Just [([t, u], Nothing)]
+unify t@(Var _ _) u = Just [([t], Just u)]
+unify t u@(Var _ _) = Just [([u], Just t)]
 
-unifies :: (Eq sc, Eq s) =>
-	[Term sc s] -> [Term sc s] -> Maybe [(Term sc s, Term sc s)]
+unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
 unifies (List ts1 : ts) (List us1 : us) = do
 	r1 <- unifies ts1 us1
@@ -47,7 +47,42 @@ unifies (t : ts) (u : us) = case unify t u of
 	Nothing -> Nothing
 	Just [] -> unifies ts us
 	Just [p] -> (p :) <$> unifies ts us
+	_ -> error "yet"
 unifies _ _ = Nothing
+
+simplify :: (Eq sc, Eq s) => Result sc s -> Maybe (Result sc s)
+simplify = (>>= simp) . sameCon
+
+simp :: (Eq sc, Eq s) => Result sc s -> Maybe (Result sc s)
+simp [] = Just []
+simp (p@(ts, v) : rest) = do
+	v' <- foldM unifMaybe v (map snd same)
+	return $ (foldr (union) ts (map fst same), v') : nosm
+	where
+	same = filter (sameVar p) rest
+	nosm = filter (not . sameVar p) rest
+
+unifMaybe :: (Eq sc, Eq s) =>
+	Maybe (Term sc s) -> Maybe (Term sc s) -> Maybe (Maybe (Term sc s))
+unifMaybe t@(Just (Con _)) Nothing = Just t
+unifMaybe Nothing u@(Just (Con _)) = Just u
+unifMaybe t@(Just (Con _)) u@(Just (Con _))
+	| t == u = Just t
+	| otherwise = Nothing
+unifMaybe _ _ = error "yet defined"
+
+sameVar :: (Eq sc, Eq s) =>
+	([Term sc s], Maybe (Term sc s)) -> ([Term sc s], Maybe (Term sc s)) -> Bool
+sameVar (ts, _) (us, _) = not $ null $ intersect ts us
+
+sameCon :: (Eq sc, Eq s) => Result sc s -> Maybe (Result sc s)
+sameCon [] = Just []
+sameCon ((_, Just (Var _ _)) : _) = error "can not occur"
+sameCon ((ts, _) : _) | any isCon ts = error "can not occur"
+sameCon ((ts, Just val) : rest) =
+	((foldl union ts $ map fst $ filter ((== Just val) . snd) rest, Just val) :)
+		<$> sameCon (filter ((/= Just val) . snd) rest)
+sameCon (p : rest) = (p :) <$> sameCon rest
 
 -- before form is bellow
 -- [(X, A), (A, Y), (B, Z), (hoge, B)] -- no (hoge, hage) or (B, B)
@@ -84,74 +119,6 @@ lookupSnd x = lookup x . map (\(y, z) -> (z, y))
 deleteSnd :: Eq b => b -> [(a, b)] -> [(a, b)]
 deleteSnd x = filter ((/= x) . snd)
 
-simplify :: (Eq sc, Eq s) =>
-	[(Term sc s, Term sc s)] -> Maybe [([Term sc s], Maybe (Term sc s))]
-simplify [] = Just []
-simplify ((Con _, Con _) : _) = error "bad before data"
-simplify ((t@(Var _ _), u@(Var _ _)) : ps) = case simplify ps of
-	Nothing -> Nothing
-	Just ps' -> case (lookupElem t ps', lookupElem u ps') of
-		(Just (ts, Just v1), Just (us, Just v2))
-			| v1 == v2 -> Just $ (ts `union` us, Just v1) :
-				deleteElem t (deleteElem u ps')
-			| otherwise -> Nothing
-		(Just (ts, Just v1), Just (us, _)) ->
-			Just $ (ts `union` us, Just v1) :
-				deleteElem t (deleteElem u ps')
-		(Just (ts, _), Just (us, v2)) ->
-			Just $ (ts `union` us, v2) :
-				deleteElem t (deleteElem u ps')
-		(Just (ts, v1), _) -> Just $ (u : ts, v1) : deleteElem t ps'
-		(_, Just (us, v2)) -> Just $ (t : us, v2) : deleteElem u ps'
-		(_, _) -> Just $ ([t, u], Nothing) : ps'
-simplify ((t@(Var _ _), u@(List us)) : ps) = case simplify ps of
-	Nothing -> Nothing
-	Just ps' -> case lookupElem t ps' of
-		Just (_ts, Just (Con _)) -> Nothing
-		Just (_ts, Just (List l)) -> case simplify =<< unifies l us of
-			Nothing -> Nothing
-			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
-		Just (_ts, Just (Cons uh ut)) -> case simplify =<< unifies [head us, List $ tail us] [uh, ut] of
-			Nothing -> Nothing
-			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
-		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
-		_ -> Just $ ([t], Just u) : ps'
-simplify ((t@(List _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
-simplify ((t@(Var _ _), u@(Cons uh ut)) : ps) = case simplify ps of
-	Nothing -> Nothing
-	Just ps' -> case lookupElem t ps' of
-		Just (_, Just (Con _)) -> Nothing
-		Just (_, Just (List (h:l))) -> case simplify =<< unifies [h, List l] [uh, ut] of
-			Nothing -> Nothing
-			Just ret -> Just $ ([t], Just u) : ret ++ deleteElem t ps'
-		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
-		_ -> Just $ ([t], Just u) : ps'
-simplify ((t@(Cons _ _), u@(Var _ _)) : ps) = simplify ((u, t) : ps)
-simplify ((t@(Var _ _), u) : ps) = case simplify ps of
-	Nothing -> Nothing
-	Just ps' -> case lookupElem t ps' of
-		Just (_, Just v1)
-			| u == v1 -> Just ps'
-			| otherwise -> Nothing
-		Just (ts, _) -> Just $ (ts, Just u) : deleteElem t ps'
-		_ -> Just $ ([t], Just u) : ps'
-simplify ((t, u) : ps) = case simplify ps of
-	Nothing -> Nothing
-	Just ps' -> case lookupElem u ps' of
-		Just (_, Just v2)
-			| t == v2 -> Just ps'
-			| otherwise -> Nothing
-		Just (us, _) -> Just $ (us, Just t) : deleteElem u ps'
-		_ -> Just $ ([u], Just t) : ps'
-
-deleteElem :: Eq a => a -> [([a], b)] -> [([a], b)]
-deleteElem _ [] = []
-deleteElem x ((xs, y) : ps)
-	| x `elem` xs = ps
-	| otherwise = (xs, y) : deleteElem x ps
-
-lookupElem :: Eq a => a -> [([a], b)] -> Maybe ([a], b)
-lookupElem _ [] = Nothing
-lookupElem x ((xs, y) : ps)
-	| x `elem` xs = Just (xs, y)
-	| otherwise = lookupElem x ps
+isCon :: Term sc s -> Bool
+isCon (Con _) = True
+isCon _ = False

@@ -211,3 +211,8 @@ List と変数の unification は List を Con のように扱えば良いよう
 2012.09.22 Sat.
 
 Unif.hs の merge を refactoring 中だが。
+
+unify の返り値を Result sc s にしたほうが良さそうだ。
+
+次は unify を List 同士や List と Cons 等に対応させて、
+もっと上の段階でも使えるようにする。
