@@ -51,7 +51,7 @@ source-repository	head
 
 executable		lojysamban
     hs-source-dirs:	src
-    main-is:		lojysamban2.hs
+    main-is:		lojysamban.hs
     other-modules:	LojysambanLib, LojbanTools, Prolog2, PrologTools,
         NotUnif, Unif
     build-depends:	base > 3 && < 5, lojbanParser >= 0.1.2, yjtools >= 0.9.16
