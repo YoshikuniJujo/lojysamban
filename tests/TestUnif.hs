@@ -1,6 +1,4 @@
-module TestUnif (
-	unif
-) where
+module TestUnif (unif) where
 
 import Test.HUnit
 import Unif

@@ -1,12 +1,10 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module TestProlog2 (
-	prolog2
-) where
+module TestProlog2 (prolog2) where
 
-import Prolog2
 import Test.HUnit
+import Prolog2
 
 prolog2 = "test of Prolog2" ~: test [
 	ask "" [] fact1 rules ~?= [[]],

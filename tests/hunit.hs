@@ -1,7 +1,8 @@
 module Main where
+
 import Test.HUnit
-
-import TestUnif
+import TestLojysambanLib
 import TestProlog2
+import TestUnif
 
-main = runTestTT $ test [unif, prolog2]
+main = runTestTT $ test [lojysambanLib, prolog2, unif]

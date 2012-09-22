@@ -3,7 +3,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE PatternGuards #-}
 
-module LojysambanLib (question, ask, readRules, isFAhO, end) where
+module LojysambanLib (ask, readRules, end) where
 
 import LojbanTools
 import Prolog2 hiding (ask)
