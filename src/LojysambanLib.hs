@@ -1,19 +1,13 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE PatternGuards #-}
 
-module LojysambanLib (
-	parse,
-	Atom(..),
-	readRules,
-	readQuestion,
-	ask1,
-	isCOhO,
-	readSentence
-) where
+module LojysambanLib (question, ask, readRules, isFAhO, end) where
 
 import LojbanTools
-import Prolog2
+import Prolog2 hiding (ask)
+import qualified Prolog2 as P
 import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString, LI)
 import qualified Language.Lojban.Parser as P
 import Data.Maybe
@@ -21,6 +15,14 @@ import Data.Either
 import Data.List
 import Control.Arrow
 import Control.Applicative
+
+end = isFAhO
+ask = question
+
+isFAhO :: String -> Bool
+isFAhO src
+	| Right (TopText _ _ _ _ _ (Just (_, "fa'o"))) <- parse src = True
+	| otherwise = False
 
 readRules :: String -> [Rule Scope Atom]
 readRules = map readSentence . getSentences . (\(Right p) -> p) . parse
@@ -36,9 +38,15 @@ isCOhO' :: Sentence -> Bool
 isCOhO' (TopText _ _ [VocativeSumti [(_, "co'o", _)] _ _] _ _ _) = True
 isCOhO' _ = False
 
+question :: String -> [Rule Scope Atom] -> Maybe String
+question q r = if isCOhO q then Nothing else Just $ question' q r
+
+question' :: String -> [Rule Scope Atom] -> String
+question' = ask1 . readQuestion
+
 ask1 :: Fact Scope Atom -> [Rule Scope Atom] -> String
 ask1 q rules =
-	let	answer = ask [] [] q rules
+	let	answer = P.ask [] [] q rules
 		answer2_1 = unwords $ intersperse ".ija" $ map unwords $ filter ((> 2) . length) $
 			map (intersperse ".ije" . map showPair .
 			filter (not . isMA . fst) . regularization . onlyTopVars) answer
@@ -51,11 +59,11 @@ ask1 q rules =
 --	print answer2
 --	putStr ".i "
 		result1 = ".i " ++ case answer of
-			[] -> "nago'i\n"
+			[] -> "nago'i"
 			_ -> case intersperse ".a" $ mapMaybe
 				((showAtom <$>) . maValue) answer of
-				[] -> if null answer2 then "go'i\n" else ""
-				m -> unwords m ++ "\n"
+				[] -> if null answer2 then "go'i" else ""
+				m -> unwords m
 	in
 	result1 ++ if (null answer2) then "" else
 		if length answer == 1 then answer2_1 else answer2

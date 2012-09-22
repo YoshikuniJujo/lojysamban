@@ -2,27 +2,19 @@ module Main where
 
 import System.IO(hFlush, stdout)
 import System.Environment(getArgs)
-import Control.Monad.Tools(doWhile_)
-import Data.List(isInfixOf)
-
-import LojysambanLib(ask1, readQuestion, readRules, isCOhO)
+import System.Exit(exitFailure)
+import Control.Applicative((<$>))
+import Control.Arrow((&&&))
+import Control.Monad.Tools(doWhile, doWhile_)
+import LojysambanLib(ask, readRules, end)
 
 main :: IO ()
 main = do
 	args <- getArgs
-	src <- case args of
-		[] -> readFacts
-		[fn] -> readFile fn
-		_ -> error "bad arguments"
+	rules <- readRules <$> case args of
+		[] -> doWhile "" $ \s -> (id &&& not . end) . (s ++) <$> getLine
+		[fp] -> readFile fp
+		_ -> putStrLn "Usage: lojysamban [FILEPATH]" >> exitFailure
 	doWhile_ $ do
-		l <- putStr ".i " >> hFlush stdout >> getLine
-		if isCOhO l then return False else do
-			putStrLn $ ask1 (readQuestion l) (readRules src)
-			return True
-
-readFacts :: IO String
-readFacts = do
-	l <- getLine
-	if "fa'o" `isInfixOf` l then return l else do
-		ls <- readFacts
-		return $ l ++ ls
+		q <- putStr ".i " >> hFlush stdout >> getLine
+		maybe (return False) ((>> return True) . putStrLn) $ ask q rules
