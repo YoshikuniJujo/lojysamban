@@ -30,12 +30,12 @@ merge (tsv@(ts, v1) : tss) uss = case filterElems ts uss of
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification ts us = simplify2All <$> (simplify =<< unifies ts us)
 
-unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Result sc s)
-unify t u | t == u = Just []
+unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Term sc s, Result sc s)
+unify t u | t == u = Just (t, [])
 unify (Con _) (Con _) = Nothing
-unify t@(Var _ _) u@(Var _ _) = Just [([t, u], Nothing)]
-unify t@(Var _ _) u = Just [([t], Just u)]
-unify t u@(Var _ _) = Just [([u], Just t)]
+unify t@(Var _ _) u@(Var _ _) = Just (t, [([t, u], Nothing)])
+unify t@(Var _ _) u = Just (u, [([t], Just u)])
+unify t u@(Var _ _) = Just (t, [([u], Just t)])
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
@@ -45,8 +45,8 @@ unifies (List ts1 : ts) (List us1 : us) = do
 	return $ r1 ++ r2
 unifies (t : ts) (u : us) = case unify t u of
 	Nothing -> Nothing
-	Just [] -> unifies ts us
-	Just [p] -> (p :) <$> unifies ts us
+	Just (_, []) -> unifies ts us
+	Just (_, [p]) -> (p :) <$> unifies ts us
 	_ -> error "yet"
 unifies _ _ = Nothing
 
@@ -64,12 +64,9 @@ simp (p@(ts, v) : rest) = do
 
 unifMaybe :: (Eq sc, Eq s) =>
 	Maybe (Term sc s) -> Maybe (Term sc s) -> Maybe (Maybe (Term sc s))
-unifMaybe t@(Just (Con _)) Nothing = Just t
-unifMaybe Nothing u@(Just (Con _)) = Just u
-unifMaybe t@(Just (Con _)) u@(Just (Con _))
-	| t == u = Just t
-	| otherwise = Nothing
-unifMaybe _ _ = error "yet defined"
+unifMaybe (Just t) (Just u) = (Just . fst) <$> unify t u
+unifMaybe t Nothing = Just t
+unifMaybe Nothing u = Just u
 
 sameVar :: (Eq sc, Eq s) =>
 	([Term sc s], Maybe (Term sc s)) -> ([Term sc s], Maybe (Term sc s)) -> Bool

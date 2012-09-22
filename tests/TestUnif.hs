@@ -15,9 +15,9 @@ testUnification = "test of unification" ~: test [
 	unification unif_1a unif_1b3 ~?= unif_1r3 ]
 
 testUnify = "test of unify" ~: test [
-	unify vx vx ~?= Just [],
-	unify cx cx ~?= Just ([] :: Result String String),
-	unify vx cx ~?= Just [([vx], Just cx)]
+	unify vx vx ~?= Just (vx, []),
+	unify cx cx ~?= Just (cx, ([] :: Result String String)),
+	unify vx cx ~?= Just (cx, [([vx], Just cx)])
  ]
 
 merge_1a = [([Var "" "X", Var "" "Y"], Nothing)]

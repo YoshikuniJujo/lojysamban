@@ -216,3 +216,17 @@ unify の返り値を Result sc s にしたほうが良さそうだ。
 
 次は unify を List 同士や List と Cons 等に対応させて、
 もっと上の段階でも使えるようにする。
+
+simp で、同じ Var に入っている List 同士を unify する。
+その結果は Result となるのだが、それらを次々に merge していく必要がある。
+またそれ自身の値はどうなるのかを考える必要がある。
+それ自身の値は、Con または、List または Cons になるはずだ。
+unify に unify の結果として、それ自身の値も返すようにしたほうが良いかもしれない。
+
+unifMaybe を (Maybe Term, Result) -> Maybe Term -> Maybe (Maybe Term, Result)
+とする。
+そして、
+	(v', r') <- foldM unifMaybe (v, 前の result の Result) (map snd same)
+	return $ (foldr union ts (map fast same), v') : simp r' nosm
+とする。
+こうすれば、simp で次々に制約が受け渡されていくだろう。
