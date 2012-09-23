@@ -64,6 +64,10 @@ unify t u@(Var _ _) = Just (t, [([u], Just t)])
 unify (List ts) (List us) = do
 	rs <- unification ts us
 	return (List $ map (flip lookupValue rs) ts, rs)
+unify (Cons h t) (List (u : us)) = do
+	rs <- unification [h, t] [u, List us]
+	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
+unify (Cons h t) (List []) = Nothing
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
