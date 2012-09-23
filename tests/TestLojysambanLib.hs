@@ -17,7 +17,8 @@ patfuA1 = Just ".i la jon.bois.sr .a la zeb"
 skari = unsafePerformIO $ readRules <$> readFile "examples/skari.jbo"
 skariQ1 = "alabam. bu toldu'o misisip. bu boi joji'as. bu boi " ++
 	"tenesis. bu boi florid. bu"
-skariA1 = Just $ read "\"\179Gn|a\240\tV\194A;\211\&3q\246\254\""
+-- skariA1 = Just $ read "\"\179Gn|a\240\tV\194A;\211\&3q\246\254\""
+skariA1 = Just $ read "\"\143\194\159\133X9\170\178\v\238\225\253\\\"\160Z\196\""
 
 lojysambanLib = "test of LojysambanLib" ~: test [
 	ask pendoQ1 pendo ~?= pendoA1,

@@ -1,3 +1,5 @@
+{-# LANGUAGE PatternGuards #-}
+
 module Unif (Term(..), Result, merge, unification, unify) where
 
 import Data.List(intersect, union)
@@ -12,20 +14,48 @@ data Term sc s =
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
-merge [] uss = Just $ simplify2All uss
-merge (tsv@(ts, v1) : tss) uss = case filterElems ts uss of
-	[] -> merge tss $ tsv : uss
-	ps -> do
-		ret <- foldM mergeValue v1 $ map snd ps
-		merge tss $ (foldr (union . fst) ts ps, ret) : deleteElems ts uss
+merge ps qs = foldM (flip merge1) qs ps
+
+merge1 :: (Eq sc, Eq s) =>
+	([Term sc s], Maybe (Term sc s)) -> Result sc s -> Maybe (Result sc s)
+merge1 (ts, mv) r
+	| [(us, mv')] <- filter (isDefFor ts) r = do
+--	| (us, mv') : _ <- filter (isDefFor ts) r = do
+		(vv, m) <- case (mv, mv') of
+			(Just v, Just v') -> do
+				(vv', m) <- unify v v'
+				return (Just vv', m)
+			(v, Nothing) -> return (v, [])
+			(_, v') -> return (v', [])
+		merge m $ (ts `union` us, vv) `add` notSames
+	| [] <- filter (isDefFor ts) r = return $ (ts, mv) `add` notSames
+	| [(us1, mv'1), (us2, mv'2)] <- filter (isDefFor ts) r = do
+		ret1 <- fun (us1, mv'1) (ts, mv) notSames
+--		let ret1' = error $ show r
+		fun (us2, mv'2) (ts `union` us1, mv) ret1
+	| err <- filter (isDefFor ts) r = error $ show $ length err
 	where
-	filterElems xs = filter (not . null . intersect xs . fst)
-	mergeValue x@(Just _) y@(Just _)
-		| x == y = Just x
-		| otherwise = Nothing
-	mergeValue x@(Just _) _ = Just x
-	mergeValue _ y = Just y
-	deleteElems xs = filter $ \ys -> null $ intersect xs $ fst ys
+--	[(us, mv')] = filter (isDefFor ts) r
+	notSames = filter (not . isDefFor ts) r
+	fun (_, mv') (tsss, mvvv) hoge = do
+		(vv, m) <- case (mvvv, mv') of
+			(Just v, Just v') -> do
+				(vv', m) <- unify v v'
+				return (Just vv', m)
+			(v, Nothing) -> return (v, [])
+			(_, v') -> return (v', [])
+		merge m $ (tsss, vv) `add` hoge
+
+add :: (Eq sc, Eq s) =>
+	([Term sc s], Maybe (Term sc s)) -> Result sc s -> Result sc s
+add (ts, v@(Just _)) rs = (foldr union ts sames, v) : notSames
+	where
+	sames = map fst $ filter ((== v) . snd) rs
+	notSames = filter ((/= v) . snd) rs
+add r1 rs = r1 : rs
+
+isDefFor :: (Eq sc, Eq s) => [Term sc s] -> ([Term sc s], Maybe (Term sc s)) -> Bool
+isDefFor ts (us, _) = not $ null $ ts `intersect` us
 
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification ts us = simplify2All <$> (simplify =<< unifies ts us)
@@ -57,7 +87,7 @@ simp :: (Eq sc, Eq s) => Result sc s -> Maybe (Result sc s)
 simp [] = Just []
 simp (p@(ts, v) : rest) = do
 	v' <- foldM unifMaybe v (map snd same)
-	return $ (foldr (union) ts (map fst same), v') : nosm
+	return $ (foldr (union . fst) ts same, v') : nosm
 	where
 	same = filter (sameVar p) rest
 	nosm = filter (not . sameVar p) rest
