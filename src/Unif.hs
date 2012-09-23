@@ -61,6 +61,9 @@ unify (Con _) (Con _) = Nothing
 unify t@(Var _ _) u@(Var _ _) = Just (t, [([t, u], Nothing)])
 unify t@(Var _ _) u = Just (u, [([t], Just u)])
 unify t u@(Var _ _) = Just (t, [([u], Just t)])
+unify (List ts) (List us) = do
+	rs <- unification ts us
+	return (List $ map (flip lookupValue rs) ts, rs)
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
@@ -69,3 +72,12 @@ unifies (t : ts) (u : us) = do
 	rets <- unifies ts us
 	merge ret rets
 unifies _ _ = Nothing
+
+lookupValue :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
+lookupValue t rs =
+	case f of
+		[] -> t
+		[(_, Nothing)] -> t
+		[(_, Just t')] -> t'
+	where
+	f = filter ((t `elem`) . fst) rs
