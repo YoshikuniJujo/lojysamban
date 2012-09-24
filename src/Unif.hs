@@ -1,13 +1,29 @@
 {-# LANGUAGE PatternGuards #-}
 
-module Unif (Term(..), Result, merge, unification, unify) where
+module Unif (Term(..), Result, merge, unification, unify, apply) where
 
 import Data.List(intersect, union)
 import Control.Monad(foldM)
 
-data Term sc s =
-	Con s | Var sc s | List [Term sc s] | Cons (Term sc s) (Term sc s)
-	deriving (Eq, Show)
+data Term sc s
+	= Con s | Var sc s | List [Term sc s] | Cons (Term sc s) (Term sc s)
+	| ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
+	| Is
+
+instance (Show sc, Show s) => Show (Term sc s) where
+	show (Con x) = "Con " ++ show x
+	show (Var sc x) = "Var " ++ show sc ++ " " ++ show x
+	show (List ts) = "List " ++ show ts
+	show (Cons h t) = "Cons (" ++ show h ++ ") (" ++ show t ++ ")"
+	show (ApplyOp _ _ _) = "ApplyOp _ _ _"
+
+instance (Eq sc, Eq s) => Eq (Term sc s) where
+	Con x == Con y = x == y
+	Var sc x == Var sc' y = sc == sc' && x == y
+	List xs == List ys = xs == ys
+	Cons h t == Cons i u = h == i && t == u
+	ApplyOp _ _ _ == ApplyOp _ _ _ = error "can't compare applys"
+	_ == _ = False
 
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
@@ -68,6 +84,23 @@ unify (Cons h t) (List (u : us)) = do
 	rs <- unification [h, t] [u, List us]
 	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
 unify (Cons h t) (List []) = Nothing
+unify (Cons h1 t1) (Cons h2 t2) = do
+	rs <- unification [h1, t1] [h2, t2]
+	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
+unify t u@(Cons _ _) = unify u t
+unify Is Is = Just (Is, [])
+unify Is _ = Nothing
+unify _ Is = Nothing
+unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
+unify (Cons _ _) (Var _ _) = error "Cons with Var"
+unify (Cons _ _) (List _) = error "Cons with List"
+unify (Cons _ _) (ApplyOp _ _ _) = error "Cons with ApplyOpp"
+unify (Cons _ _) Is = error "Cons with Is"
+unify (Cons _ _) _ = error "Cons with _"
+unify (List _) _ = error "List with _"
+unify (ApplyOp _ _ _) (List _) = error "AppOp with List"
+unify (Con _) (List _) = Nothing -- error "Con with List"
+unify _ (List _) = error "_ with List"
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
@@ -85,3 +118,9 @@ lookupValue t rs =
 		[(_, Just t')] -> t'
 	where
 	f = filter ((t `elem`) . fst) rs
+
+apply (ApplyOp op t u) rs
+	| Con x <- lookupValue t rs, Con y <- lookupValue u rs =
+		Con $ op x y
+	| otherwise = error "cannot apply"
+apply x rs = x

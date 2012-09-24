@@ -11,7 +11,8 @@ module PrologTools (
 	NotFact,
 	Rule(..),
 	notAsk,
-	checkAll
+	checkAll,
+	apply
 ) where
 
 import NotUnif

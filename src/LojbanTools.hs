@@ -15,7 +15,7 @@ getSentences (TopText _ _ _ _ (Just t) _) = getSentences t
 getSentences (IText_1 _ _ _ _ (Just t)) = getSentences t
 getSentences (StatementI s1 ss) = s1 : mapMaybe (\(_, _, s) -> s) ss
 getSentences tbt@(TermsBridiTail{}) = [tbt]
-getSentences o = error $ show o
+getSentences o = error $ "getSentences: " ++ show o
 
 headTerms :: Sentence -> [Sumti]
 headTerms (TermsBridiTail ts _ _ _) = ts

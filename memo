@@ -230,3 +230,19 @@ unifMaybe を (Maybe Term, Result) -> Maybe Term -> Maybe (Maybe Term, Result)
 	return $ (foldr union ts (map fast same), v') : simp r' nosm
 とする。
 こうすれば、simp で次々に制約が受け渡されていくだろう。
+
+2012.09.23 Sun.
+
+is と + を実装しようかと思う。
+とりあえず binxo でも使おうかな。
+is は無条件で Result に ([var], Just val) を追加すれば良い。
++ はその var に
+
+Prolog モジュールのところで先頭が binxo だった場合のみ特別扱いにするのが良いだろう。
+Term にも特別な値を用意しておいた方がいいか、
+あるいは Atom のレベルで用意すれば十分か。
+xy. binxo lo terziljmina be xy. bei li pa
+といった感じ。
+
+今の実装だと、na の rule が最後に check されるので意図通りに動かない可能性がある。
+まあ、これを直すのは先々の話になるだろう。

@@ -11,7 +11,9 @@ prolog2 = "test of Prolog2" ~: test [
 	ask "" [] fact1 rules ~?= [[]],
 	ask "" [] q1 rules ~?= [],
 	ask "" [] q2 rules ~?= [prolog2_result1],
-	ask "" [] patfuQ1 patfuRules ~?= patfuResult1 ]
+	ask "" [] patfuQ1 patfuRules ~?= patfuResult1,
+	ask "" [] binxoQ2 binxoRules ~?= binxoR2,
+	ask "" [] applyQ1 applyRules ~?= applyR1 ]
 
 prolog2_result1 = [
 	([Var "dnnnd" "Z"], Just (Con "cheese")),
@@ -66,3 +68,30 @@ patfuR4 = Rule patfuF5 [] [patfuF6, patfuF7] []
 patfuQ1 sc = [Con "dzena", Var sc "Who", Con "jon.bois.jr."]
 
 patfuRules = [patfuR1, patfuR2, patfuR3, patfuR4]
+
+binxoRule1 = Rule (\sc -> [Is, Var sc "Y", Con "x"]) [] [] []
+duRule = Rule fact6 [] [] []
+binxoQ1 sc = [Con "du", Var sc "What", Var sc "Y"]
+
+binxoFact1 sc = [Is, Var sc "Z", Con "x"]
+binxoRule2 = Rule (\sc -> [Con "fun", Var sc "Z"]) [] [binxoFact1] []
+binxoRules = [binxoRule2, duRule, duRule]
+binxoQ2 sc = [Con "fun", Var sc "What"]
+binxoR2 = [[([Var "dd" "Z", Var "d" "What"], Just (Con "x"))]]
+
+applyFact1 sc = [Is, Var sc "X", ApplyOp (++) (Con "x") (Con "y")]
+applyRule1 = Rule (\sc -> [Con "fun", Var sc "X"]) [] [applyFact1] []
+applyRules = [applyRule1]
+applyQ1 sc = [Con "fun", Var sc "What"]
+applyR1 = [[([Var "dd" "X", Var "d" "What"], Just (Con "xy"))]]
+
+countFact0 sc = [Con "zilkancu", List [], Con ""]
+countFact1 sc = [Con "zilkancu", Cons (Var sc "stedu") (Var sc "rebla"),
+	Var sc "da"]
+countFact2 sc = [Con "zilkancu", Var sc "rebla", Var sc "de"]
+countFact3 sc = [Is, Var sc "da", ApplyOp (++) (Var sc "de") (Con ".")]
+countRule1 = Rule countFact0 [] [] []
+countRule2 = Rule countFact1 [] [countFact2, countFact3] []
+countRules = [countRule1, countRule2]
+countQ1 sc = [Con "zilkancu", List [], Var sc "ma"]
+countQ2 sc = [Con "zilkancu", List [Con "a", Con "b"], Var sc "ma"]

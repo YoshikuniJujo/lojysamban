@@ -67,6 +67,8 @@ ask1 q rules =
 				[] -> if null answer2 then "go'i" else ""
 				m -> unwords m
 	in
+--	show answer ++ "\n" ++
+--	show (q []) ++
 	result1 ++ if (null answer2) then "" else
 		if length answer == 1 then answer2_1 else answer2
 
@@ -128,6 +130,8 @@ data Atom
 	| ListA [Atom]
 	deriving (Show, Eq)
 
+addLI (LI x) (LI y) = LI (x + y)
+
 type Scope = [Int]
 
 instance TwoD [Int] where
@@ -137,9 +141,16 @@ instance TwoD [Int] where
 
 readSumti :: Scope -> Sumti -> Term Scope Atom
 readSumti _ (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ intercalate "." $ map snd3 ns
-readSumti _ (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (P.Brivla (_, "kunti", _) _) _) _ _) = List []
-readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla (_, "selzilvi'u", _) _) (BE (_, "be", _) _ s1 (Just (BEI (_, "bei", _) _ s2 _))
-	_ _)) _) _ _) = Cons (readSumti sc s1) (readSumti sc s2)
+readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla
+	(_, "terziljmina", _) _) (BE (_, "be", _) _ s1
+	(Just (BEI (_, "bei", _) _ s2 _)) _ _)) _) _ _) =
+	ApplyOp addLI (readSumti sc s1) (readSumti sc s2)
+readSumti _ (P.LALE (_, "lo", _) _ (SelbriRelativeClauses
+	(P.Brivla (_, "kunti", _) _) _) _ _) = List []
+readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla
+	(_, "selzilvi'u", _) _) (BE (_, "be", _) _ s1
+	(Just (BEI (_, "bei", _) _ s2 _)) _ _)) _) _ _) =
+	Cons (readSumti sc s1) (readSumti sc s2)
 readSumti _ (P.LALE (_, "lo", _) _ st _ _) = Con $ LO $ readSumtiTail st
 readSumti sc (P.KOhA (_, k, _) _) = Var sc $ KOhA k
 readSumti sc (P.LerfuString s _ _) = Var sc $ LerfuString $ concatMap snd3 s
@@ -165,6 +176,8 @@ readTen :: Int -> [String] -> Int
 readTen = foldl (\r n -> r * 10 + fromJust (lookup n paList))
 
 readSumtiTail :: SumtiTail -> String
+readSumtiTail (SelbriRelativeClauses (P.Brivla (_, "terziljmina", _) _) _) =
+	error "readSumtiTail: terziljmina"
 readSumtiTail (SelbriRelativeClauses (P.Brivla (_, n, _) _) _) = n
 readSumtiTail st = show st
 
@@ -173,6 +186,7 @@ readSelbriAtom (P.GOhA (_, n, _) _ _) = GOhA n
 readSelbriAtom o = error $ "readSelbriAtom: " ++ show o
 
 readSelbri :: Selbri -> Either (Term Scope Atom) (Term Scope Atom)
+readSelbri (P.Brivla (_, "binxo", _) _) = Left Is
 readSelbri (P.Brivla (_, n, _) _) = Left $ Con $ Brivla n
 readSelbri (P.GOhA (_, n, _) _ _) = Left $ Con $ GOhA n
 readSelbri (P.NA (_, "na", _) _ s) = Right $ Con $ readSelbriAtom s
