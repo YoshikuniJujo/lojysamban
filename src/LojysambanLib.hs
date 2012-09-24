@@ -104,6 +104,7 @@ getList (Cons v var@(Var _ _)) r
 		lookupValue v r : map (flip lookupValue r) vs
 	| c@(Cons _ _) <- lookupValue var r,
 		List vs <- getList c r = List $ lookupValue v r : vs
+getList _ _ = error "not implemented"
 
 isMA :: Term Scope Atom -> Bool
 isMA (Var [_] (KOhA "ma")) = True
