@@ -15,14 +15,15 @@ instance (Show sc, Show s) => Show (Term sc s) where
 	show (Var sc x) = "Var " ++ show sc ++ " " ++ show x
 	show (List ts) = "List " ++ show ts
 	show (Cons h t) = "Cons (" ++ show h ++ ") (" ++ show t ++ ")"
-	show (ApplyOp _ _ _) = "ApplyOp _ _ _"
+	show (ApplyOp{}) = "ApplyOp _ _ _"
+	show Is = "Is"
 
 instance (Eq sc, Eq s) => Eq (Term sc s) where
 	Con x == Con y = x == y
 	Var sc x == Var sc' y = sc == sc' && x == y
 	List xs == List ys = xs == ys
 	Cons h t == Cons i u = h == i && t == u
-	ApplyOp _ _ _ == ApplyOp _ _ _ = error "can't compare applys"
+	ApplyOp{} == ApplyOp{} = error "can't compare applys"
 	_ == _ = False
 
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
@@ -79,11 +80,11 @@ unify t@(Var _ _) u = Just (u, [([t], Just u)])
 unify t u@(Var _ _) = Just (t, [([u], Just t)])
 unify (List ts) (List us) = do
 	rs <- unification ts us
-	return (List $ map (flip lookupValue rs) ts, rs)
+	return (List $ map (`lookupValue` rs) ts, rs)
 unify (Cons h t) (List (u : us)) = do
 	rs <- unification [h, t] [u, List us]
 	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
-unify (Cons h t) (List []) = Nothing
+unify (Cons _ _) (List []) = Nothing
 unify (Cons h1 t1) (Cons h2 t2) = do
 	rs <- unification [h1, t1] [h2, t2]
 	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
@@ -92,15 +93,10 @@ unify Is Is = Just (Is, [])
 unify Is _ = Nothing
 unify _ Is = Nothing
 unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
-unify (Cons _ _) (Var _ _) = error "Cons with Var"
-unify (Cons _ _) (List _) = error "Cons with List"
-unify (Cons _ _) (ApplyOp _ _ _) = error "Cons with ApplyOpp"
-unify (Cons _ _) Is = error "Cons with Is"
 unify (Cons _ _) _ = error "Cons with _"
-unify (List _) _ = error "List with _"
-unify (ApplyOp _ _ _) (List _) = error "AppOp with List"
+unify (ApplyOp{}) (List _) = error "AppOp with List"
 unify (Con _) (List _) = Nothing -- error "Con with List"
-unify _ (List _) = error "_ with List"
+unify _ _ = error "not implemented"
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
@@ -116,9 +112,11 @@ lookupValue t rs =
 		[] -> t
 		[(_, Nothing)] -> t
 		[(_, Just t')] -> t'
+		_ -> error "cannot occur"
 	where
 	f = filter ((t `elem`) . fst) rs
 
+apply :: (Eq s, Eq sc) => Term sc s -> Result sc s -> Term sc s
 apply (ApplyOp op t u) rs
 	| Con x <- lookupValue t rs, Con y <- lookupValue u rs =
 		Con $ op x y

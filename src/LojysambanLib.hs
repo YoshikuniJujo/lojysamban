@@ -69,7 +69,7 @@ ask1 q rules =
 	in
 --	show answer ++ "\n" ++
 --	show (q []) ++
-	result1 ++ if (null answer2) then "" else
+	result1 ++ if null answer2 then "" else
 		if length answer == 1 then answer2_1 else answer2
 
 showAtom :: Atom -> String
@@ -130,15 +130,13 @@ data Atom
 	| ListA [Atom]
 	deriving (Show, Eq)
 
+addLI, divLI :: Atom -> Atom -> Atom
 addLI (LI x) (LI y) = LI $ x + y
+addLI _ _ = error "not number"
 divLI (LI x) (LI y) = LI $ x `div` y
+divLI _ _ = error "not number"
 
 type Scope = [Int]
-
-instance TwoD [Int] where
-	next (n : ns) = n + 1 : ns
-	next _ = error "empty"
-	down ns = 0 : ns
 
 readSumti :: Scope -> Sumti -> Term Scope Atom
 readSumti _ (P.LA (_, "la", _) _ _ ns _) = Con $ LA $ intercalate "." $ map snd3 ns

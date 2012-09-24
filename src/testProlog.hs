@@ -19,12 +19,12 @@ fact5 sc = [Con "likes", Var sc "Y", Var sc "Z"]
 rule1 :: Rule String String
 rule1 = Rule fact1 [] [] []
 rule2 = Rule fact2 [] [] []
-rule2_5 = Rule fact3 [] [] []
+rule25 = Rule fact3 [] [] []
 rule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])
 --	[NotUnify (Var "" "X") (Var "" "Y")] [fact4, fact5] []
 	[] [fact4, fact5] [\sc -> [Con "du", Var sc "X", Var sc "Y"]]
 rule4 = Rule (\sc -> [Con "du", Var sc "D", Var sc "D"]) [] [] []
-rules = [rule1, rule2, rule2_5, rule3, rule4]
+rules = [rule1, rule2, rule25, rule3, rule4]
 
 simpleRule = [rule1, rule2, srule3]
 srule3 = Rule (\sc -> [Con "friends", Var sc "X", Var sc "Y"])

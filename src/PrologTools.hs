@@ -22,6 +22,11 @@ class TwoD td where
 	next :: td -> td
 	down :: td -> td
 
+instance TwoD [Int] where
+	next (n : ns) = n + 1 : ns
+	next _ = error "empty"
+	down ns = 0 : ns
+
 type Fact sc s = sc -> [Term sc s]
 type NotFact sc s = Fact sc s
 data Unify sc s
