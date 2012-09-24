@@ -86,7 +86,24 @@ maValue r = case filter (not . null . fst) $ map (first $ filter isMA) r of
 	((_, tv) : _) -> flip (<$>) tv $ \tv' -> case tv' of
 		Con v -> v
 		List vs -> ListA $ map (\(Con v) -> v) vs
-		o -> error $ "maValue: " ++ show o
+		c@(Cons _ _) -> ListA $ map (\(Con v) -> v) $
+			(\(List vs) -> vs) $ getList c r
+{-
+		Cons v (List vs) -> ListA $
+			(\(Con v) -> v) (lookupValue v r) : map (\(Con v) -> v) vs
+		Cons v vs@(Var _ _) -> ListA $
+			(\(Con v) -> v) (lookupValue v r) : map (\(Con v) -> v)
+				((\(List l) -> l) $ lookupValue vs r)
+-}
+		o -> error $ "maValue: " ++ show o ++ " r = " ++ show r
+
+getList :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
+getList l@(List _) _ = l
+getList (Cons v var@(Var _ _)) r
+	| List vs <- lookupValue var r = List $
+		lookupValue v r : map (flip lookupValue r) vs
+	| c@(Cons _ _) <- lookupValue var r,
+		List vs <- getList c r = List $ lookupValue v r : vs
 
 isMA :: Term Scope Atom -> Bool
 isMA (Var [_] (KOhA "ma")) = True

@@ -1,6 +1,6 @@
 {-# LANGUAGE PatternGuards #-}
 
-module Unif (Term(..), Result, merge, unification, unify, apply) where
+module Unif (Term(..), Result, merge, unification, unify, apply, lookupValue) where
 
 import Data.List(intersect, union)
 import Control.Monad(foldM)
