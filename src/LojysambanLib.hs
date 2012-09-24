@@ -130,7 +130,8 @@ data Atom
 	| ListA [Atom]
 	deriving (Show, Eq)
 
-addLI (LI x) (LI y) = LI (x + y)
+addLI (LI x) (LI y) = LI $ x + y
+divLI (LI x) (LI y) = LI $ x `div` y
 
 type Scope = [Int]
 
@@ -145,6 +146,10 @@ readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla
 	(_, "terziljmina", _) _) (BE (_, "be", _) _ s1
 	(Just (BEI (_, "bei", _) _ s2 _)) _ _)) _) _ _) =
 	ApplyOp addLI (readSumti sc s1) (readSumti sc s2)
+readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla
+	(_, "dilcu", _) _) (BE (_, "be", _) _ s1
+	(Just (BEI (_, "bei", _) _ s2 _)) _ _)) _) _ _) =
+	ApplyOp divLI (readSumti sc s1) (readSumti sc s2)
 readSumti _ (P.LALE (_, "lo", _) _ (SelbriRelativeClauses
 	(P.Brivla (_, "kunti", _) _) _) _ _) = List []
 readSumti sc (P.LALE (_, "lo", _) _ (SelbriRelativeClauses (Linkargs (P.Brivla

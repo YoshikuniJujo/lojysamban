@@ -123,4 +123,4 @@ apply (ApplyOp op t u) rs
 	| Con x <- lookupValue t rs, Con y <- lookupValue u rs =
 		Con $ op x y
 	| otherwise = error "cannot apply"
-apply x rs = x
+apply x rs = lookupValue x rs
