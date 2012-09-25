@@ -30,6 +30,7 @@ tu'u
 		xy.cipa ce'o xy.cire ce'o xy.cici ce'o xy.civo ce'o
 		xy.vopa ce'o xy.vore ce'o xy.voci ce'o xy.vovo .i
 	de pavyvonbi'i .i
+
 	ry.pa du xy.papa ce'o xy.pare ce'o xy.paci ce'o xy.pavo .i
 	ry.re du xy.repa ce'o xy.rere ce'o xy.reci ce'o xy.revo .i
 	ry.ci du xy.cipa ce'o xy.cire ce'o xy.cici ce'o xy.civo .i
@@ -37,7 +38,25 @@ tu'u
 	ry.pa datsi'u .i
 	ry.re datsi'u .i
 	ry.ci datsi'u .i
-	ry.vo datsi'u
+	ry.vo datsi'u .i
+
+	cy.pa du xy.papa ce'o xy.repa ce'o xy.cipa ce'o xy.vopa .i
+	cy.re du xy.pare ce'o xy.rere ce'o xy.cire ce'o xy.vore .i
+	cy.ci du xy.paci ce'o xy.reci ce'o xy.cici ce'o xy.voci .i
+	cy.vo du xy.pavo ce'o xy.revo ce'o xy.civo ce'o xy.vovo .i
+	cy.pa datsi'u .i
+	cy.re datsi'u .i
+	cy.ci datsi'u .i
+	cy.vo datsi'u .i
+
+	sy.pa du xy.papa ce'o xy.pare ce'o xy.repa ce'o xy.rere .i
+	sy.re du xy.paci ce'o xy.pavo ce'o xy.reci ce'o xy.revo .i
+	sy.ci du xy.cipa ce'o xy.cire ce'o xy.vopa ce'o xy.vore .i
+	sy.vo du xy.cici ce'o xy.civo ce'o xy.voci ce'o xy.vovo .i
+	sy.pa datsi'u .i
+	sy.re datsi'u .i
+	sy.ci datsi'u .i
+	sy.vo datsi'u
 tu'u
 
 .i da brodi de .ijanai tu'e
