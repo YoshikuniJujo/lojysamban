@@ -4,11 +4,19 @@ module Unif (Term(..), Result, merge, unification, unify, apply, lookupValue) wh
 
 import Data.List(intersect, union)
 import Control.Monad(foldM)
+import Control.Applicative
+import Control.Arrow
 
 data Term sc s
 	= Con s | Var sc s | List [Term sc s] | Cons (Term sc s) (Term sc s)
 	| ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
 	| Is
+
+applyResult :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
+applyResult t rs = lookupValue t rs
+
+simplifyResult :: (Eq sc, Eq s) => Result sc s -> Result sc s
+simplifyResult rs = map (second $ fmap $ flip lookupValue rs) rs
 
 instance (Show sc, Show s) => Show (Term sc s) where
 	show (Con x) = "Con " ++ show x
@@ -29,7 +37,7 @@ instance (Eq sc, Eq s) => Eq (Term sc s) where
 type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
-merge ps qs = foldM (flip merge1) qs ps
+merge ps qs = simplifyResult <$> foldM (flip merge1) qs ps
 
 merge1 :: (Eq sc, Eq s) =>
 	([Term sc s], Maybe (Term sc s)) -> Result sc s -> Maybe (Result sc s)
@@ -93,10 +101,11 @@ unify Is Is = Just (Is, [])
 unify Is _ = Nothing
 unify _ Is = Nothing
 unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
-unify (Cons _ _) _ = error "Cons with _"
-unify (ApplyOp{}) (List _) = error "AppOp with List"
 unify (Con _) (List _) = Nothing -- error "Con with List"
-unify _ _ = error "not implemented"
+unify (List _) (Con _) = Nothing
+unify (ApplyOp{}) (List _) = error "AppOp with List"
+unify (Cons _ _) _ = error "Cons with _"
+unify _ _ = error "unify: not implemented"
 
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
@@ -107,7 +116,9 @@ unifies (t : ts) (u : us) = do
 unifies _ _ = Nothing
 
 lookupValue :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
-lookupValue t rs =
+lookupValue t@(Con _) _ = t
+lookupValue t@(Var _ _) rs =
+-- lookupValue t rs =
 	case f of
 		[] -> t
 		[(_, Nothing)] -> t
@@ -115,6 +126,8 @@ lookupValue t rs =
 		_ -> error "cannot occur"
 	where
 	f = filter ((t `elem`) . fst) rs
+lookupValue (List ts) rs = List $ map (flip lookupValue rs) ts
+lookupValue (Cons h t) rs = Cons (lookupValue h rs) (lookupValue t rs)
 
 apply :: (Eq s, Eq sc) => Term sc s -> Result sc s -> Term sc s
 apply (ApplyOp op t u) rs

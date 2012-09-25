@@ -29,7 +29,7 @@ askrule :: (TwoD sc, Eq sc, Eq s) =>
 	sc -> Result sc s -> Fact sc s -> Rule sc s -> [Rule sc s] -> [Result sc s]
 askrule sc ret q (Rule fact _ facts notFacts) rs
 --	| [Is, t, u] <- fact (next sc) = maybeToList $ [([t], Just u)] `merge` ret
-	| [Is, _, _] <- fact (next sc) = error "not implemented"
+	| [Is, _, _] <- fact (next sc) = error "askrule: not implemented"
 	| otherwise = filter (`checkAll` nots) ret'
 	where
 	ret' = foldl (\rets (sc', f) -> rets >>= \r' -> ask sc' r' f rs) r0 $

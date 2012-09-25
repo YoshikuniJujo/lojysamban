@@ -9,7 +9,7 @@ import Crypto.Hash.MD5
 lojysambanLib = "test of LojysambanLib" ~: test [
 	ask pendoQ1 pendo ~?= pendoA1,
 	ask patfuQ1 patfu ~?= patfuA1,
-	(hash . read . show) <$> ask skariQ1 skari ~?= skariA1,
+	(hash . read . show . drop 4) <$> ask skariQ1 skari ~?= skariA1,
 	ask jminaQ1 jmina ~?= Just ".i li 3" ]
 
 pendo = unsafePerformIO $ readRules <$> readFile "examples/pendo.jbo"
@@ -31,3 +31,11 @@ cmimaQ1 = "ma cmima la .as. ce'o la .yb."
 
 jmina = unsafePerformIO $ readRules <$> readFile "examples/jmina.jbo"
 jminaQ1 = "ma broda"
+
+nonkanynac = unsafePerformIO $ readRules <$> readFile "examples/nonkanynac.jbo"
+nonkanynacQ1 =
+	"lipa ce'o lire ce'o licilo'o ce'o .abu ce'o " ++
+	"lipa ce'o lire ce'o lici ce'o livo ce'o " ++
+	"lipa ce'o lire ce'o lici ce'o livo ce'o " ++
+	"lipa ce'o lire ce'o lici ce'o livo " ++
+	"nonkanyna'u ma"
