@@ -8,12 +8,50 @@ import Control.Applicative
 import Control.Arrow
 
 data Term sc s
-	= Con s | Var sc s | List [Term sc s] | Cons (Term sc s) (Term sc s)
-	| ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
-	| Is
+	= Var sc s | Con s | ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
+	| Is | List [Term sc s] | Cons (Term sc s) (Term sc s)
 
-applyResult :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
-applyResult t rs = lookupValue t rs
+unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Term sc s, Result sc s)
+unify t u | t == u = Just (t, [])
+unify t@(Var _ _) u@(Var _ _) = Just (t, [([t, u], Nothing)])
+unify t@(Var _ _) u = Just (u, [([t], Just u)])
+unify t u@(Var _ _) = unify u t
+unify (Con _) (Con _) = Nothing
+unify (Con _) ApplyOp{} = error "unify Con{} ApplyOp{}: not implemented yet"
+unify t@ApplyOp{} u@(Con _) = unify u t
+unify (Con _) _ = Nothing
+unify _ (Con _) = Nothing
+unify ApplyOp{} ApplyOp{} = error "unify ApplyOp{} ApplyOP{}: not implemented yet"
+unify ApplyOp{} _ = Nothing
+unify _ ApplyOp{} = Nothing
+unify Is _ = Nothing
+unify _ Is = Nothing
+unify (List ts) (List us) = do
+	rs <- unification ts us
+	return (List $ map (`lookupValue` rs) ts, rs)
+unify (List (t : ts)) (Cons head tail) = do
+	rs <- unification [t, List ts] [head, tail]
+	return (List (lookupValue t rs : map (`lookupValue` rs) ts), rs)
+unify t@(Cons _ _) u@(List (_ : _)) = unify u t
+--	= Var sc s | Con s | ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
+--	| Is | List [Term sc s] | Cons (Term sc s) (Term sc s)
+unify (Cons h t) (List (u : us)) = do
+	rs <- unification [h, t] [u, List us]
+	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
+unify (Cons _ _) (List []) = Nothing
+unify (Cons h1 t1) (Cons h2 t2) = do
+	rs <- unification [h1, t1] [h2, t2]
+	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
+unify t u@(Cons _ _) = unify u t
+unify Is Is = Just (Is, [])
+unify Is _ = Nothing
+unify _ Is = Nothing
+unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
+unify (Con _) (List _) = Nothing -- error "Con with List"
+unify (List _) (Con _) = Nothing
+unify (ApplyOp{}) (List _) = error "AppOp with List"
+unify (Cons _ _) _ = error "Cons with _"
+unify _ _ = error "unify: not implemented"
 
 simplifyResult :: (Eq sc, Eq s) => Result sc s -> Result sc s
 simplifyResult rs = map (second $ fmap $ flip lookupValue rs) rs
@@ -80,33 +118,6 @@ isDefFor ts (us, _) = not $ null $ ts `intersect` us
 unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unification = unifies
 
-unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Term sc s, Result sc s)
-unify t u | t == u = Just (t, [])
-unify (Con _) (Con _) = Nothing
-unify t@(Var _ _) u@(Var _ _) = Just (t, [([t, u], Nothing)])
-unify t@(Var _ _) u = Just (u, [([t], Just u)])
-unify t u@(Var _ _) = Just (t, [([u], Just t)])
-unify (List ts) (List us) = do
-	rs <- unification ts us
-	return (List $ map (`lookupValue` rs) ts, rs)
-unify (Cons h t) (List (u : us)) = do
-	rs <- unification [h, t] [u, List us]
-	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
-unify (Cons _ _) (List []) = Nothing
-unify (Cons h1 t1) (Cons h2 t2) = do
-	rs <- unification [h1, t1] [h2, t2]
-	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
-unify t u@(Cons _ _) = unify u t
-unify Is Is = Just (Is, [])
-unify Is _ = Nothing
-unify _ Is = Nothing
-unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
-unify (Con _) (List _) = Nothing -- error "Con with List"
-unify (List _) (Con _) = Nothing
-unify (ApplyOp{}) (List _) = error "AppOp with List"
-unify (Cons _ _) _ = error "Cons with _"
-unify _ _ = error "unify: not implemented"
-
 unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
 unifies [] [] = Just []
 unifies (t : ts) (u : us) = do
@@ -126,8 +137,9 @@ lookupValue t@(Var _ _) rs =
 		_ -> error "cannot occur"
 	where
 	f = filter ((t `elem`) . fst) rs
-lookupValue (List ts) rs = List $ map (flip lookupValue rs) ts
+lookupValue (List ts) rs = List $ map (`lookupValue` rs) ts
 lookupValue (Cons h t) rs = Cons (lookupValue h rs) (lookupValue t rs)
+lookupValue _ _ = error "lookupValue: not implemented"
 
 apply :: (Eq s, Eq sc) => Term sc s -> Result sc s -> Term sc s
 apply (ApplyOp op t u) rs
