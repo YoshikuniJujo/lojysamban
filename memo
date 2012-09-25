@@ -246,3 +246,12 @@ xy. binxo lo terziljmina be xy. bei li pa
 
 今の実装だと、na の rule が最後に check されるので意図通りに動かない可能性がある。
 まあ、これを直すのは先々の話になるだろう。
+
+2012.09.25 Tue.
+
+今の段階でできることを test としてまとめてしまおう。
+とりあえず、全部が違うという rule の処理はできるので、
+そこらへんの test を LojysambanLib と Prolog2 のレベルで作成して、
+hunit に登録しておく。
+そしたら、リファクタリングを行う。
+目標は .ijanai のなかで datsi'u を使ったときにうまく動かないところの修正だ。

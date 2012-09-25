@@ -13,7 +13,8 @@ prolog2 = "test of Prolog2" ~: test [
 	ask "" [] q2 rules ~?= [prolog2_result1],
 	ask "" [] patfuQ1 patfuRules ~?= patfuResult1,
 	ask "" [] binxoQ2 binxoRules ~?= binxoR2,
-	ask "" [] applyQ1 applyRules ~?= applyR1 ]
+	ask "" [] applyQ1 applyRules ~?= applyR1,
+	ask "" [] test2Q4 test2Rules ~?= test2R4 ]
 
 prolog2_result1 = [
 	([Var "dnnnd" "Z"], Just (Con "cheese")),
@@ -174,9 +175,9 @@ test2Rule6 = Rule test2Fact6 [] [] []
 test2Rule7 = Rule test2Fact7 [] [test2Fact8, test2Fact9] []
 
 test2Fact10 sc = [Con "datsi'u", List []]
-test2Fact11 sc = [Con "datsi'u", Cons (Var sc "da") (Var sc "de")]
-test2Fact12 sc = [Con "broda", Var sc "da", Var sc "de"]
-test2Fact13 sc = [Con "datsi'u", Var sc "de"]
+test2Fact11 sc = [Con "datsi'u", Cons (Var sc "DA") (Var sc "DE")]
+test2Fact12 sc = [Con "broda", Var sc "DA", Var sc "DE"]
+test2Fact13 sc = [Con "datsi'u", Var sc "DE"]
 
 test2Rule8 = Rule test2Fact10 [] [] []
 test2Rule9 = Rule test2Fact11 [] [test2Fact12, test2Fact13] []
@@ -202,3 +203,21 @@ test2Q0 sc = [Con "brode", Var sc "ma"]
 test2Q1 sc = [Con "broda", Con "ci", List [Con "pa", Con "re", Con "re"]]
 test2Q2 sc = [Con "drata", Con "ci", Con "pa"]
 test2Q3 sc = [Con "broda", Con "ci", List []]
+test2Q4 sc = [Con "datsi'u", List [Con "pa", Con "re", Con "ci"]]
+test2R4 = [[
+ ([Var "dnnnnnnnnnddnnnnnnnd" "de",Var "dnnnnnnnnndndnnnnnnnnnd" "DA",
+	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "da",
+	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnndndnnnnnnd" "da"],Just (Con "re")),
+ ([Var "dnnnnnnnnnd" "DE"],Just (Cons (Con "re") (List [Con "ci"]))),
+ ([Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "di",
+	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "di",
+	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnd" "DE"],Just( List [])),
+ ([Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "de",
+	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "de",
+	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnd" "DA",
+	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnddnnnnnnd" "da"],Just (Con "ci")),
+ ([Var "dnnnnnnnnndndnnnnnnnnnd" "DE",Var "dnnnnnnnnnddnnnnnnnd" "di"],
+	Just (Cons (Con "ci") (List []))),
+ ([Var "dnnnnnnnnnd" "DA",Var "dnnnnnnnnnddnnnnnnnd" "da",
+	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "da",
+	Var "dnnnnnnnnnddnnnnnnndndnnnnnnndndnnnnnnd" "da"],Just (Con "pa"))]]

@@ -10,7 +10,11 @@ lojysambanLib = "test of LojysambanLib" ~: test [
 	ask pendoQ1 pendo ~?= pendoA1,
 	ask patfuQ1 patfu ~?= patfuA1,
 	(hash . read . show . drop 4) <$> ask skariQ1 skari ~?= skariA1,
-	ask jminaQ1 jmina ~?= Just ".i li 3" ]
+	ask jminaQ1 jmina ~?= Just ".i li 3",
+	ask nonkanynacQ2 nonkanynac ~?= Just ".i go'i",
+	ask nonkanynacQ3 nonkanynac ~?= Just ".i nago'i",
+	ask nonkanynacQ4 nonkanynac ~?= Just ".i nago'i"
+ ]
 
 pendo = unsafePerformIO $ readRules <$> readFile "examples/pendo.jbo"
 pendoQ1 = "la .ualeis. pendo ma"
@@ -39,3 +43,6 @@ nonkanynacQ1 =
 	"lipa ce'o lire ce'o lici ce'o livo ce'o " ++
 	"lipa ce'o lire ce'o lici ce'o livo " ++
 	"nonkanyna'u ma"
+nonkanynacQ2 = "la .iocikun. ce'o la .ituk. ce'o la manam. cu datsi'u"
+nonkanynacQ3 = "la .iocikun. ce'o la .ituk. ce'o la .iocikun. cu datsi'u"
+nonkanynacQ4 = "la .ituk. ce'o la .iocikun. ce'o la .iocikun. cu datsi'u"
