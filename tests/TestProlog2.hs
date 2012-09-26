@@ -205,19 +205,19 @@ test2Q2 sc = [Con "drata", Con "ci", Con "pa"]
 test2Q3 sc = [Con "broda", Con "ci", List []]
 test2Q4 sc = [Con "datsi'u", List [Con "pa", Con "re", Con "ci"]]
 test2R4 = [[
- ([Var "dnnnnnnnnnddnnnnnnnd" "de",Var "dnnnnnnnnndndnnnnnnnnnd" "DA",
-	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "da",
-	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnndndnnnnnnd" "da"],Just (Con "re")),
- ([Var "dnnnnnnnnnd" "DE"],Just (Cons (Con "re") (List [Con "ci"]))),
  ([Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "di",
 	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "di",
-	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnd" "DE"],Just( List [])),
+	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnd" "DE"],Just (List [])),
  ([Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "de",
 	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "de",
 	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnd" "DA",
 	Var "dnnnnnnnnndndnnnnnnnnndndnnnnnnnnnddnnnnnnd" "da"],Just (Con "ci")),
- ([Var "dnnnnnnnnndndnnnnnnnnnd" "DE",Var "dnnnnnnnnnddnnnnnnnd" "di"],
-	Just (Cons (Con "ci") (List []))),
+ ([Var "dnnnnnnnnnddnnnnnnnd" "di",
+	Var "dnnnnnnnnndndnnnnnnnnnd" "DE"],Just (List [Con "ci"])),
+ ([Var "dnnnnnnnnnddnnnnnnnd" "de",Var "dnnnnnnnnndndnnnnnnnnnd" "DA",
+	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnnd" "da",
+	Var "dnnnnnnnnndndnnnnnnnnnddnnnnnnndndnnnnnnd" "da"],Just (Con "re")),
+ ([Var "dnnnnnnnnnd" "DE"],Just (List [Con "re",Con "ci"])),
  ([Var "dnnnnnnnnnd" "DA",Var "dnnnnnnnnnddnnnnnnnd" "da",
 	Var "dnnnnnnnnnddnnnnnnndndnnnnnnnd" "da",
 	Var "dnnnnnnnnnddnnnnnnndndnnnnnnndndnnnnnnd" "da"],Just (Con "pa"))]]

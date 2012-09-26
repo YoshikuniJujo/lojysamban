@@ -6,6 +6,8 @@ import System.IO.Unsafe
 import LojysambanLib
 import Crypto.Hash.MD5
 
+main = maybe (return ()) putStrLn $ ask nonkanynacQ1 nonkanynac
+
 lojysambanLib = "test of LojysambanLib" ~: test [
 	ask pendoQ1 pendo ~?= pendoA1,
 	ask patfuQ1 patfu ~?= patfuA1,
@@ -38,10 +40,10 @@ jminaQ1 = "ma broda"
 
 nonkanynac = unsafePerformIO $ readRules <$> readFile "examples/nonkanynac.jbo"
 nonkanynacQ1 =
-	"lipa ce'o lire ce'o licilo'o ce'o .abu ce'o " ++
-	"lipa ce'o lire ce'o lici ce'o livo ce'o " ++
-	"lipa ce'o lire ce'o lici ce'o livo ce'o " ++
-	"lipa ce'o lire ce'o lici ce'o livo " ++
+	"livo ce'o lipa ce'o lirelo'o ce'o .abu ce'o " ++
+	"lire ce'o licilo'o ce'o by. ce'o lipa ce'o " ++
+	"lipalo'o ce'o dy. ce'o lici ce'o livolo'o ce'o " ++
+	".ebu ce'o livo ce'o lipa ce'o lire " ++
 	"nonkanyna'u ma"
 nonkanynacQ2 = "la .iocikun. ce'o la .ituk. ce'o la manam. cu datsi'u"
 nonkanynacQ3 = "la .iocikun. ce'o la .ituk. ce'o la .iocikun. cu datsi'u"
