@@ -3,7 +3,7 @@ module TestUnif (unif) where
 import Test.HUnit
 import Unif
 
-unif = "test of Unif" ~: test [testMerge, testUnification, testUnify]
+unif = "test of Unif" ~: test [testMerge, testUnification]
 
 testMerge = "test of merge" ~: test [
 	merge [] [] ~?= Just ([] :: Result String String),
@@ -17,11 +17,13 @@ testUnification = "test of unification" ~: test [
 	unification unif_1a unif_1b2 ~?= Nothing,
 	unification unif_1a unif_1b3 ~?= unif_1r3 ]
 
+{-
 testUnify = "test of unify" ~: test [
 	unify vx vx ~?= Just (vx, []),
 	unify cx cx ~?= Just (cx, ([] :: Result String String)),
 	unify vx cx ~?= Just (cx, [([vx], Just cx)])
  ]
+-}
 
 merge_1a = [([vx, vy], Nothing)]
 merge_1b = [([vx], Just cx)]

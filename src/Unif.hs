@@ -1,15 +1,41 @@
 {-# LANGUAGE PatternGuards #-}
 
-module Unif (Term(..), Result, merge, unification, unify, apply, lookupValue) where
+module Unif (Result, Term(..), unification, merge, apply, lookupValue) where
 
 import Data.List(intersect, union)
+import Control.Applicative((<$>))
+import Control.Arrow(second)
 import Control.Monad(foldM)
-import Control.Applicative
-import Control.Arrow
+
+type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 data Term sc s
 	= Var sc s | Con s | ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
 	| Is | List [Term sc s] | Cons (Term sc s) (Term sc s)
+
+instance (Eq sc, Eq s) => Eq (Term sc s) where
+	Var sc x == Var sc' y = sc == sc' && x == y
+	Con x == Con y = x == y
+	ApplyOp{} == ApplyOp{} = error "can't compare applys"
+	Is == Is = True
+	List xs == List ys = xs == ys
+	Cons h t == Cons i u = h == i && t == u
+	_ == _ = False
+
+instance (Show sc, Show s) => Show (Term sc s) where
+	show (Var sc x) = "(Var " ++ show sc ++ " " ++ show x ++ ")"
+	show (Con x) = "(Con " ++ show x ++ ")"
+	show (ApplyOp{}) = "(ApplyOp _ _ _)"
+	show Is = "Is"
+	show (List ts) = "(List " ++ show ts ++ ")"
+	show (Cons h t) = "(Cons (" ++ show h ++ ") (" ++ show t ++ "))"
+
+unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
+unification [] [] = Just []
+unification (t : ts) (u : us) = do
+	(_, ret) <- unify t u
+	merge ret =<< unification ts us
+unification _ _ = Nothing
 
 unify :: (Eq sc, Eq s) => Term sc s -> Term sc s -> Maybe (Term sc s, Result sc s)
 unify t u | t == u = Just (t, [])
@@ -29,50 +55,17 @@ unify _ Is = Nothing
 unify (List ts) (List us) = do
 	rs <- unification ts us
 	return (List $ map (`lookupValue` rs) ts, rs)
-unify (List (t : ts)) (Cons head tail) = do
-	rs <- unification [t, List ts] [head, tail]
+unify (List []) Cons{} = Nothing
+unify (List (t : ts)) (Cons hd tl) = do
+	rs <- unification [t, List ts] [hd, tl]
 	return (List (lookupValue t rs : map (`lookupValue` rs) ts), rs)
-unify t@(Cons _ _) u@(List (_ : _)) = unify u t
---	= Var sc s | Con s | ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
---	| Is | List [Term sc s] | Cons (Term sc s) (Term sc s)
-unify (Cons h t) (List (u : us)) = do
-	rs <- unification [h, t] [u, List us]
-	return (Cons (lookupValue h rs) (lookupValue t rs), rs)
-unify (Cons _ _) (List []) = Nothing
+unify t@(Cons _ _) u@(List _) = unify u t
 unify (Cons h1 t1) (Cons h2 t2) = do
 	rs <- unification [h1, t1] [h2, t2]
 	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
-unify t u@(Cons _ _) = unify u t
-unify Is Is = Just (Is, [])
-unify Is _ = Nothing
-unify _ Is = Nothing
-unify (Cons _ _) (Con _) = Nothing -- error "Cons with Con"
-unify (Con _) (List _) = Nothing -- error "Con with List"
-unify (List _) (Con _) = Nothing
-unify (ApplyOp{}) (List _) = error "AppOp with List"
-unify (Cons _ _) _ = error "Cons with _"
-unify _ _ = error "unify: not implemented"
 
 simplifyResult :: (Eq sc, Eq s) => Result sc s -> Result sc s
 simplifyResult rs = map (second $ fmap $ flip lookupValue rs) rs
-
-instance (Show sc, Show s) => Show (Term sc s) where
-	show (Con x) = "Con " ++ show x
-	show (Var sc x) = "Var " ++ show sc ++ " " ++ show x
-	show (List ts) = "List " ++ show ts
-	show (Cons h t) = "Cons (" ++ show h ++ ") (" ++ show t ++ ")"
-	show (ApplyOp{}) = "ApplyOp _ _ _"
-	show Is = "Is"
-
-instance (Eq sc, Eq s) => Eq (Term sc s) where
-	Con x == Con y = x == y
-	Var sc x == Var sc' y = sc == sc' && x == y
-	List xs == List ys = xs == ys
-	Cons h t == Cons i u = h == i && t == u
-	ApplyOp{} == ApplyOp{} = error "can't compare applys"
-	_ == _ = False
-
-type Result sc s = [([Term sc s], Maybe (Term sc s))]
 
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
 merge ps qs = simplifyResult <$> foldM (flip merge1) qs ps
@@ -114,17 +107,6 @@ add r1 rs = r1 : rs
 
 isDefFor :: (Eq sc, Eq s) => [Term sc s] -> ([Term sc s], Maybe (Term sc s)) -> Bool
 isDefFor ts (us, _) = not $ null $ ts `intersect` us
-
-unification :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
-unification = unifies
-
-unifies :: (Eq sc, Eq s) => [Term sc s] -> [Term sc s] -> Maybe (Result sc s)
-unifies [] [] = Just []
-unifies (t : ts) (u : us) = do
-	(_, ret) <- unify t u
-	rets <- unifies ts us
-	merge ret rets
-unifies _ _ = Nothing
 
 lookupValue :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
 lookupValue t@(Con _) _ = t
