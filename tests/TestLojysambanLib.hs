@@ -40,10 +40,10 @@ jminaQ1 = "ma broda"
 
 nonkanynac = unsafePerformIO $ readRules <$> readFile "examples/nonkanynac.jbo"
 nonkanynacQ1 =
-	"livo ce'o lipa ce'o lirelo'o ce'o .abu ce'o " ++
-	"lire ce'o licilo'o ce'o by. ce'o lipa ce'o " ++
-	"lipalo'o ce'o dy. ce'o lici ce'o livolo'o ce'o " ++
-	".ebu ce'o livo ce'o lipa ce'o lire " ++
+	"xy.papa ce'o xy.pare    ce'o lire    ce'o licilo'o ce'o " ++
+	"xy.repa ce'o xy.rere    ce'o xy.reci ce'o xy.revo  ce'o " ++
+	"xy.cipa ce'o xy.cire    ce'o xy.cici ce'o livo     ce'o " ++
+	"lici    ce'o livolo'o   ce'o xy.voci ce'o xy.vovo       " ++
 	"nonkanyna'u ma"
 nonkanynacQ2 = "la .iocikun. ce'o la .ituk. ce'o la manam. cu datsi'u"
 nonkanynacQ3 = "la .iocikun. ce'o la .ituk. ce'o la .iocikun. cu datsi'u"
