@@ -12,7 +12,7 @@ module PrologTools (
 	Rule(..),
 	notAsk,
 	checkAll,
-	apply
+	applyIs
 ) where
 
 import NotUnif

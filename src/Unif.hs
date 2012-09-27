@@ -1,6 +1,6 @@
 {-# LANGUAGE PatternGuards #-}
 
-module Unif (Result, Term(..), unification, merge, apply) where
+module Unif (Result, Term(..), unification, merge, applyIs) where
 
 import Data.List(intersect, union)
 import Control.Applicative((<$>))
@@ -120,6 +120,11 @@ lookupValue t@(Var _ _) rs =
 lookupValue (List ts) rs = List $ map (`lookupValue` rs) ts
 lookupValue (Cons h t) rs = Cons (lookupValue h rs) (lookupValue t rs)
 lookupValue _ _ = error "lookupValue: not implemented"
+
+applyIs :: (Eq s, Eq sc) => [Term sc s] -> Result sc s -> Maybe (Result sc s)
+applyIs [Is, t@(Var _ _), u] rs = [([t], Just $ apply u rs)] `merge` rs
+applyIs (Is : _) _ = error "applyIs: Usage: Is [var] [val]"
+applyIs _ _ = error "cant apply Is"
 
 apply :: (Eq s, Eq sc) => Term sc s -> Result sc s -> Term sc s
 apply (ApplyOp op t u) rs

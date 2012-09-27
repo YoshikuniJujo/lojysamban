@@ -15,7 +15,8 @@ lojysambanLib = "test of LojysambanLib" ~: test [
 	ask jminaQ1 jmina ~?= Just ".i li 3",
 --	ask nonkanynacQ2 nonkanynac ~?= Just ".i go'i",
 	ask nonkanynacQ3 nonkanynac ~?= Just ".i nago'i",
-	ask nonkanynacQ4 nonkanynac ~?= Just ".i nago'i"
+	ask nonkanynacQ4 nonkanynac ~?= Just ".i nago'i",
+	ask zilkancuQ1 zilkancu ~?= zilkancuR1
  ]
 
 pendo = unsafePerformIO $ readRules <$> readFile "examples/pendo.jbo"
@@ -54,3 +55,7 @@ nonkanynacQ5 =
 	"lipa ce'o lirelo'o    ce'o xy.cici ce'o livo  ce'o " ++
 	"lici    ce'o livo   ce'o lipalo'o ce'o xy.vovo       " ++
 	"nonkanyna'u ma"
+
+zilkancu = unsafePerformIO $ readRules <$> readFile "examples/zilkancu.jbo"
+zilkancuQ1 = "ma zilselna'o lipa ce'o lire ce'o lici"
+zilkancuR1 = Just ".i li 2"

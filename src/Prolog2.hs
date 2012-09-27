@@ -15,8 +15,7 @@ import Data.Maybe
 ask :: (TwoD sc, Eq sc, Eq s) =>
 	sc -> Result sc s -> Fact sc s -> [Rule sc s] -> [Result sc s]
 ask sc ret q rs
-	| [Is, t, u] <- q sc =
-		maybeToList $ [([t], Just $ apply u ret)] `merge` ret
+	| is@(Is : _) <- q sc = maybeToList $ applyIs is ret
 	| otherwise = concat $ zipWith ar (iterate next $ down sc) rs
 	where
 	ar sc' r = askrule sc' ret q r rs
