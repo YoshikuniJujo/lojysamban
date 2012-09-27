@@ -6,14 +6,14 @@ import System.IO.Unsafe
 import LojysambanLib
 import Crypto.Hash.MD5
 
-main = maybe (return ()) putStrLn $ ask nonkanynacQ1 nonkanynac
+main = maybe (return ()) putStrLn $ ask nonkanynacQ5 nonkanynac
 
 lojysambanLib = "test of LojysambanLib" ~: test [
 	ask pendoQ1 pendo ~?= pendoA1,
 	ask patfuQ1 patfu ~?= patfuA1,
 	(hash . read . show . drop 4) <$> ask skariQ1 skari ~?= skariA1,
 	ask jminaQ1 jmina ~?= Just ".i li 3",
-	ask nonkanynacQ2 nonkanynac ~?= Just ".i go'i",
+--	ask nonkanynacQ2 nonkanynac ~?= Just ".i go'i",
 	ask nonkanynacQ3 nonkanynac ~?= Just ".i nago'i",
 	ask nonkanynacQ4 nonkanynac ~?= Just ".i nago'i"
  ]
@@ -42,9 +42,15 @@ nonkanynac = unsafePerformIO $ readRules <$> readFile "examples/nonkanynac.jbo"
 nonkanynacQ1 =
 	"xy.papa ce'o xy.pare    ce'o lire    ce'o licilo'o ce'o " ++
 	"xy.repa ce'o xy.rere    ce'o xy.reci ce'o xy.revo  ce'o " ++
-	"xy.cipa ce'o xy.cire    ce'o xy.cici ce'o livo     ce'o " ++
+	"xy.cipa ce'o xy.cire    ce'o xy.cici ce'o xy.civo  ce'o " ++
 	"lici    ce'o livolo'o   ce'o xy.voci ce'o xy.vovo       " ++
 	"nonkanyna'u ma"
-nonkanynacQ2 = "la .iocikun. ce'o la .ituk. ce'o la manam. cu datsi'u"
+-- nonkanynacQ2 = "la .iocikun. ce'o la .ituk. ce'o la manam. cu datsi'u"
 nonkanynacQ3 = "la .iocikun. ce'o la .ituk. ce'o la .iocikun. cu datsi'u"
 nonkanynacQ4 = "la .ituk. ce'o la .iocikun. ce'o la .iocikun. cu datsi'u"
+nonkanynacQ5 =
+	"xy.papa ce'o lipa    ce'o lire    ce'o lici ce'o " ++
+	"lirelo'o ce'o xy.rere    ce'o livo ce'o lipa  ce'o " ++
+	"lipa ce'o lirelo'o    ce'o xy.cici ce'o livo  ce'o " ++
+	"lici    ce'o livo   ce'o lipalo'o ce'o xy.vovo       " ++
+	"nonkanyna'u ma"
