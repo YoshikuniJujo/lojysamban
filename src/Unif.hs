@@ -1,13 +1,14 @@
 {-# LANGUAGE PatternGuards #-}
 
-module Unif (Result, Term(..), unification, merge, apply, lookupValue) where
+module Unif (Result, Term(..), unification, merge, apply) where
 
 import Data.List(intersect, union)
 import Control.Applicative((<$>))
 import Control.Arrow(second)
 import Control.Monad(foldM)
 
-type Result sc s = [([Term sc s], Maybe (Term sc s))]
+type Result sc s = [Result1 sc s]
+type Result1 sc s = ([Term sc s], Maybe (Term sc s))
 
 data Term sc s
 	= Var sc s | Con s | ApplyOp (s -> s -> s) (Term sc s) (Term sc s)
@@ -64,16 +65,15 @@ unify (Cons h1 t1) (Cons h2 t2) = do
 	rs <- unification [h1, t1] [h2, t2]
 	return (Cons (lookupValue h1 rs) (lookupValue t1 rs), rs)
 
-simplifyResult :: (Eq sc, Eq s) => Result sc s -> Result sc s
-simplifyResult rs = map (second $ fmap $ flip lookupValue rs) rs
-
 merge :: (Eq sc, Eq s) => Result sc s -> Result sc s -> Maybe (Result sc s)
 merge ps qs = simplifyResult <$> foldM (flip merge1) qs ps
 
-merge1 :: (Eq sc, Eq s) =>
-	([Term sc s], Maybe (Term sc s)) -> Result sc s -> Maybe (Result sc s)
+simplifyResult :: (Eq sc, Eq s) => Result sc s -> Result sc s
+simplifyResult rs = map (second $ fmap $ flip lookupValue rs) rs
+
+merge1 :: (Eq sc, Eq s) => Result1 sc s -> Result sc s -> Maybe (Result sc s)
 merge1 (ts, mv) r
-	| [(us, mv')] <- filter (isDefFor ts) r = do
+	| [(us, mv')] <- filter (isShare ts . fst) r = do
 		(vv, m) <- case (mv, mv') of
 			(Just v, Just v') -> do
 				(vv', m) <- unify v v'
@@ -81,13 +81,13 @@ merge1 (ts, mv) r
 			(v, Nothing) -> return (v, [])
 			(_, v') -> return (v', [])
 		merge m $ (ts `union` us, vv) `add` notSames
-	| [] <- filter (isDefFor ts) r = return $ (ts, mv) `add` notSames
-	| [(us1, mv'1), (us2, mv'2)] <- filter (isDefFor ts) r = do
+	| [] <- filter (isShare ts . fst) r = return $ (ts, mv) `add` notSames
+	| [(us1, mv'1), (us2, mv'2)] <- filter (isShare ts . fst) r = do
 		ret1 <- fun (us1, mv'1) (ts, mv) notSames
 		fun (us2, mv'2) (ts `union` us1, mv) ret1
-	| err <- filter (isDefFor ts) r = error $ show $ length err
+	| err <- filter (isShare ts . fst) r = error $ show $ length err
 	where
-	notSames = filter (not . isDefFor ts) r
+	notSames = filter (not . isShare ts . fst) r
 	fun (_, mv') (tsss, mvvv) hoge = do
 		(vv, m) <- case (mvvv, mv') of
 			(Just v, Just v') -> do
@@ -97,21 +97,19 @@ merge1 (ts, mv) r
 			(_, v') -> return (v', [])
 		merge m $ (tsss, vv) `add` hoge
 
-add :: (Eq sc, Eq s) =>
-	([Term sc s], Maybe (Term sc s)) -> Result sc s -> Result sc s
+add :: (Eq sc, Eq s) => Result1 sc s -> Result sc s -> Result sc s
 add (ts, v@(Just _)) rs = (foldr union ts sames, v) : notSames
 	where
 	sames = map fst $ filter ((== v) . snd) rs
 	notSames = filter ((/= v) . snd) rs
 add r1 rs = r1 : rs
 
-isDefFor :: (Eq sc, Eq s) => [Term sc s] -> ([Term sc s], Maybe (Term sc s)) -> Bool
-isDefFor ts (us, _) = not $ null $ ts `intersect` us
+isShare :: Eq a => [a] -> [a] -> Bool
+isShare = (.) (not . null) . intersect
 
 lookupValue :: (Eq sc, Eq s) => Term sc s -> Result sc s -> Term sc s
 lookupValue t@(Con _) _ = t
 lookupValue t@(Var _ _) rs =
--- lookupValue t rs =
 	case f of
 		[] -> t
 		[(_, Nothing)] -> t

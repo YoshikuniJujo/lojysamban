@@ -6,8 +6,7 @@ module Prolog2 (
 	Rule(..),
 	Term(..),
 	TwoD(..),
-	Result,
-	lookupValue
+	Result
 ) where
 
 import PrologTools

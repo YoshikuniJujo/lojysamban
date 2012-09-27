@@ -7,8 +7,7 @@ module NotUnif (
 	checkNot,
 	deleteFromNot,
 	notUnification,
-	apply,
-	lookupValue,
+	apply
 ) where
 
 import Unif
