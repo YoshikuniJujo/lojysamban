@@ -8,7 +8,7 @@ module LojysambanLib (ask, readRules, end) where
 import LojbanTools
 import Prolog2 hiding (ask)
 import qualified Prolog2 as P
-import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString, LI)
+import Language.Lojban.Parser hiding (LA, Brivla, KOhA, GOhA, NA, LerfuString, LI, Term)
 import qualified Language.Lojban.Parser as P
 import Data.Maybe
 import Data.Either
